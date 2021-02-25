@@ -34,69 +34,32 @@ def main():
 				break
 		else:
 			if game.get_player_move() == player:
-				if game.player_on_move == 0:
-					print('=' * 20)
-					print('MOVE - PLAYER 0')
-					print(f'MOVE COUNTER: {game.moves[player]}')
-					print('LAST CARD:', game.last_card)
-					print('=' * 10)
-					for idx, card in enumerate(game.p1_cards):
-						print(f'{idx} // {card}')
-					print('=' * 20)
+				print('=' * 20)
+				print(f'MOVE - PLAYER {player}')
+				print(f'MOVE COUNTER: {game.moves[player]}')
+				print('LAST CARD:', game.last_card)
+				print('=' * 10)
+				for idx, card in enumerate(game.p_cards[player]):
+					print(f'{idx} // {card}')
+				print('=' * 20)
+				use_idx = int(input('[>] Enter IDX of card you want to use: '))
+				while not game.valid_input(game.player_on_move, use_idx):
 					use_idx = int(input('[>] Enter IDX of card you want to use: '))
-					while not game.valid_input(game.player_on_move, use_idx):
-						use_idx = int(input('[>] Enter IDX of card you want to use: '))
 
-					try:
-						game = n.send(str(use_idx))
-					except:
-						run = False
-						print('[ - ] Couldnt get game...')
-						break
+				game = n.send(str(use_idx))
 
-					if game.pick_color:
-						while True:
-							color = input('Next color? (RED / GREEN / BLUE / YELLOW) ').lower()
-							if color == 'red' or color == 'green' or color == 'blue' or color == 'yellow':
-								game = n.send(color)
-								break
+				if game.pick_color:
+					while True:
+						color = input('Next color? (RED / GREEN / BLUE / YELLOW) ').lower()
+						if color == 'red' or color == 'green' or color == 'blue' or color == 'yellow':
+							game = n.send(color)
+							break
 
-					if game.winner == player:
-						print('You are the winner.')
+				if game.winner == player:
+					print('You are the winner.')
 
-					print()
+				print()
 
-				else:
-					print('=' * 20)
-					print('MOVE - PLAYER 1')
-					print(f'MOVE COUNTER: {game.moves[player]}')
-					print('LAST CARD:', game.last_card)
-					print('=' * 10)
-					for idx, card in enumerate(game.p2_cards):
-						print(f'{idx} // {card}')
-					print('=' * 20)
-					use_idx = int(input('[>] Enter IDX of card you want to use: '))
-					while not game.valid_input(game.player_on_move, use_idx):
-						use_idx = int(input('[>] Enter IDX of card you want to use: '))
-
-					try:
-						game = n.send(str(use_idx))
-					except:
-						run = False
-						print('[ - ] Couldnt get game...')
-						break
-
-					if game.pick_color:
-						while True:
-							color = input('Next color? (RED / GREEN / BLUE / YELLOW) ').lower()
-							if color == 'red' or color == 'green' or color == 'blue' or color == 'yellow':
-								game = n.send(color)
-								break
-
-					if game.winner == player:
-						print('You are the winner.')
-
-					print()
 			else:
 				print('[ - ] Waiting for player to play')
 				time.sleep(2)
