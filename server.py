@@ -3,8 +3,9 @@ import socket
 from _thread import start_new_thread
 import pickle
 from game import Game
+import time
 
-server = "localhost"
+server = 'localhost'
 port = 5555
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -19,6 +20,7 @@ print('[ > ] Server started, waiting for connection...')
 
 games = {}
 id_count = 0
+last_data = -1
 
 def threaded_clinet(conn, p, game_id):
 	global id_count
@@ -35,16 +37,21 @@ def threaded_clinet(conn, p, game_id):
 				if not data:
 					break
 				else:
-					if data == "reset":
-						game.reset_moved()
-					elif data == "finish":
-						game.give_win(p)
-					elif data == "tie":
-						game.give_tie(p)
-					elif data != "get":
-						game.play(p, data)
+					if data == 'get':
+						conn.sendall(pickle.dumps(game))
 
-					conn.sendall(pickle.dumps(game))
+					elif data == 'reset':
+						game.reset()
+						conn.sendall(pickle.dumps(game))
+
+					elif data == 'red' or data == 'green' or data == 'blue' or data == 'yellow': 
+						game.use_card(p, int(last_data), data)
+						conn.sendall(pickle.dumps(game))
+
+					else:
+						last_data = data
+						game.use_card(p, int(data))
+						conn.sendall(pickle.dumps(game))
 			else:
 				break
 		except:
@@ -72,6 +79,7 @@ while True:
 		print('[ + ] Creating a new game...')
 	else:
 		games[game_id].ready = True
+		games[game_id].give_cards()
 		p = 1
 
 	start_new_thread(threaded_clinet, (conn, p, game_id))

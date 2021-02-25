@@ -5,6 +5,7 @@ class Game():
 	def __init__(self, id):
 		self.id = id
 		self.ready = False
+		self.winner = None
 		self.player_on_move = None
 		self.deck_cards = self.create_deck()
 		self.p1_cards = []
@@ -12,34 +13,40 @@ class Game():
 		self.last_card = None
 		self.ground_deck = []
 		self.direction = 1
-		self.give_cards()
+		self.pick_color = False
 
 		self.wins = [0, 0]
-		self.ties = [0, 0]
 		self.moves = [0, 0]
 
-	def get_player_move(self):
-		return self.player_on_move
+	def reset(self):
+		self.winner = None
+		self.player_on_move = None
+		self.deck_cards = self.create_deck()
+		self.p1_cards = []
+		self.p2_cards = []
+		self.last_card = None
+		self.ground_deck = []
+		self.direction = 1
+		self.pick_color = False
+		self.give_cards()
 
 	def connected(self):
 		return self.ready
 
-	def check_winner(self):
-		if len(self.p1_cards) == 0:
-			return 0
-		if len(self.p2_cards) == 0:
-			return 1
-		return -1
+	def get_player_move(self):
+		return self.player_on_move
+
+	def check_is_winner(self, player):
+		if player == 0:
+			if len(self.p1_cards) == 0:
+				return True
+		else:
+			if len(self.p2_cards) == 0:
+				return True
+		return False
 
 	def give_win(self, player):
 		self.wins[player] += 1
-
-	def give_tie(self, player):
-		self.ties[player] += 1
-
-	def reset_moved(self):
-		self.p1_cards = []
-		self.p2_cards = []
 
 	def create_deck(self):
 		deck = []
@@ -71,7 +78,6 @@ class Game():
 			card = self.deck_cards[0]
 			self.deck_cards.pop(0)
 			self.deck_cards.append(card)
-			print('DEBUG: TOP CARD REMOVED')
 
 	def give_cards(self):
 		self.remove_special()
@@ -94,8 +100,6 @@ class Game():
 
 		# Set first move player
 		self.player_on_move = self.get_first_move()
-
-		print(f'DEBUG AFTER GIVING CARDS LENGHT: {len(self.deck_cards)}')
 
 	def get_first_move(self):
 		max_1 = 0
@@ -134,8 +138,6 @@ class Game():
 				self.p2_cards.append(card)
 				self.deck_cards.pop(0)
 
-		print(f'DEBUG AFTER DRAWING CARDS LENGHT: {len(self.deck_cards)}')
-		print(f'DEBUG GROUND DECK: {len(self.ground_deck)}')
 
 	def skip(self):
 		self.reverse()
@@ -164,16 +166,12 @@ class Game():
 			return True
 		return False
 
-	def pick_color(self):
-		while True:
-			color = input('Next color? (RED / GREEN / BLUE / YELLOW) ').lower()
-			if color != 'red' or color != 'green' or color != 'blue' or color != 'yellow':
-				return color
+	def use_card(self, player, card_idx, picked_color=None):
+		self.moves[player] += 1
 
-	def use_card(self, player, card_idx):
 		if player == 0:
 			card = self.p1_cards[card_idx]
-			if game.can_use_card(card):
+			if self.can_use_card(card):
 				on_move_again = False
 				color = ''
 				if card.type == 'DRAW2':
@@ -188,22 +186,29 @@ class Game():
 					self.skip()
 
 				elif card.type == 'WILDCOLOR':
-					color = self.pick_color()
+					if picked_color == None:
+						self.pick_color = True
+						return None
+					else:
+						color = picked_color
 
 				elif card.type == 'WILD4':
-					self.draw(self.get_next(), 4)
-					color = self.pick_color()
+					if picked_color == None:
+						self.pick_color = True
+						return None
+					else:
+						self.draw(self.get_next(), 4)
+						color = picked_color
 
 				self.last_card = card
 				if color != '':
 					self.last_card.color = color.upper()
+					self.pick_color = False
 				self.p1_cards.pop(card_idx)
 				self.ground_deck.append(self.last_card)
 
 				if not on_move_again:
 					self.set_next_on_move()
-
-				self.check_winner()
 
 			else:
 				print('[-] Cant use that card. Drawing card.')
@@ -212,7 +217,7 @@ class Game():
 
 		else:
 			card = self.p2_cards[card_idx]
-			if game.can_use_card(card):
+			if self.can_use_card(card):
 				on_move_again = False
 				color = ''
 				if card.type == 'DRAW2':
@@ -227,26 +232,49 @@ class Game():
 					self.skip()
 
 				elif card.type == 'WILDCOLOR':
-					color = self.pick_color()
+					if picked_color == None:
+						self.pick_color = True
+						return None
+					else:
+						color = picked_color
 
 				elif card.type == 'WILD4':
-					self.draw(self.get_next(), 4)
-					color = self.pick_color()
+					if picked_color == None:
+						self.pick_color = True
+						return None
+					else:
+						self.draw(self.get_next(), 4)
+						color = picked_color
 
 				self.last_card = card
 				if color != '':
 					self.last_card.color = color.upper()
+					self.pick_color = False
 				self.p2_cards.pop(card_idx)
 				self.ground_deck.append(self.last_card)
 
 				if not on_move_again:
 					self.set_next_on_move()
 
-				self.check_winner()
 			else:
 				print('[-] Cant use that card. Drawing card.')
 				self.draw(player, 1)
 				self.set_next_on_move()
+
+		if self.check_is_winner(player):
+			self.wins[player] += 1
+			self.winner = player
+
+
+	def valid_input(self, player, idx):
+		if player == 0:
+			if idx < 0 or idx >= len(self.p1_cards):
+				return False
+		else:
+			if idx < 0 or idx >= len(self.p2_cards):
+				return False
+
+		return True
 
 
 class Card():
@@ -264,35 +292,3 @@ class Card():
 
 	def __str__(self):
 		return f'{self.type}-{self.color}- {self.value}'
-		
-
-game = Game(0)
-
-while game.check_winner() != 0 and game.check_winner() != 1:
-	if game.player_on_move == 0:
-		print('=' * 20)
-		print('LAST CARD:', game.last_card)
-		for idx, card in enumerate(game.p1_cards):
-			print(f'{idx} // {card}')
-		print('=' * 20)
-		use_card = int(input('[>] Enter IDX of card you want to use: '))
-		game.use_card(0, use_card)
-		print()
-		print()
-		print()
-
-	else:
-		print('=' * 20)
-		print('LAST CARD:', game.last_card)
-		for idx, card in enumerate(game.p2_cards):
-			print(f'{idx} // {card}')
-		print('=' * 20)
-		use_card = int(input('[>] Enter IDX of card you want to use: '))
-		game.use_card(1, use_card)
-		print()
-		print()
-		print()
-
-winner = game.check_winner()
-print(winner)
-
