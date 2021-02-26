@@ -47,23 +47,28 @@ class Game():
 		deck = []
 		for color in ['RED', 'GREEN', 'BLUE', 'YELLOW']:
 			for i in range(1, 10):
-				deck.append(Card('NUMBER', color, i))
-				deck.append(Card('NUMBER', color, i))
+				img = f'images/{color.lower()}/{color.lower()}_{i}.jpg'
+				deck.append(Card('NUMBER', color, i, img))
+				deck.append(Card('NUMBER', color, i, img))
 
-			deck.append(Card('NUMBER', color, 0))
+			img = f'images/{color.lower()}/{color.lower()}_0.jpg'
+			deck.append(Card('NUMBER', color, 0, img))
 
-			deck.append(Card('DRAW2', color, -1))
-			deck.append(Card('DRAW2', color, -1))
+			img = f'images/{color.lower()}/{color.lower()}_draw_2.jpg'
+			deck.append(Card('DRAW2', color, -1, img))
+			deck.append(Card('DRAW2', color, -1, img))
 
-			deck.append(Card('REVERSE', color, -1))
-			deck.append(Card('REVERSE', color, -1))
+			img = f'images/{color.lower()}/{color.lower()}_reverse.jpg'
+			deck.append(Card('REVERSE', color, -1, img))
+			deck.append(Card('REVERSE', color, -1, img))
 
-			deck.append(Card('SKIP', color, -1))
-			deck.append(Card('SKIP', color, -1))
+			img = f'images/{color.lower()}/{color.lower()}_skip.jpg'
+			deck.append(Card('SKIP', color, -1, img))
+			deck.append(Card('SKIP', color, -1, img))
 
 		for i in range(4):
-			deck.append(Card('WILDCOLOR', 'WILD', -1))
-			deck.append(Card('WILD4', 'WILD', -1))
+			deck.append(Card('WILDCOLOR', 'WILD', -1, 'images/wild_color.jpg'))
+			deck.append(Card('WILD4', 'WILD', -1, 'images/wild_4.jpg'))
 
 		random.shuffle(deck)
 		return deck
@@ -161,10 +166,14 @@ class Game():
 	def use_card(self, player, card_idx, picked_color=None):
 		self.moves[player] += 1
 
-		card = self.p_cards[player][card_idx]
-		if self.can_use_card(card):
+		if card_idx == -1:
+			self.draw(player, 1)
+			self.set_next_on_move()
+		else:
+			card = self.p_cards[player][card_idx]
 			on_move_again = False
 			color = ''
+
 			if card.type == 'DRAW2':
 				self.draw(self.get_next(), 2)
 
@@ -201,11 +210,6 @@ class Game():
 			if not on_move_again:
 				self.set_next_on_move()
 
-		else:
-			print('[-] Cant use that card. Drawing card.')
-			self.draw(player, 1)
-			self.set_next_on_move()
-
 		if self.check_is_winner(player):
 			self.wins[player] += 1
 			self.winner = player
@@ -222,10 +226,11 @@ class Card():
 	DOCSTRING:
 
 	"""
-	def __init__(self, type, color, value):
+	def __init__(self, type, color, value, img):
 		self.type = type
 		self.color = color
 		self.value = value
+		self.img = img
 
 	def __repr__(self):
 		return f'\n{self.type}, {self.color}, {self.value}'

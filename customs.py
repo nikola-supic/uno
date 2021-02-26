@@ -36,7 +36,7 @@ class Text():
 	DOCSTRING:
 
 	"""
-	def __init__(self, surface, text, pos, color, text_size=22, text_font=None, center=False):
+	def __init__(self, surface, text, pos, color, text_size=22, text_font=None, center=False, right=False):
 		self.surface = surface
 		self.text = text
 		self.pos = pos
@@ -45,6 +45,7 @@ class Text():
 		self.text_size = text_size
 		self.text_font = text_font
 		self.center = center
+		self.right = right
 		
 		self.draw()
 
@@ -54,6 +55,8 @@ class Text():
 		txt = font.render(self.text, True, self.color)
 		if self.center:
 			text_rect = txt.get_rect(center=(x, y))
+		elif self.right:
+			text_rect = txt.get_rect(midright=(x, y))
 		else:
 			text_rect = txt.get_rect(midleft=(x, y))
 		self.surface.blit(txt, text_rect)
@@ -104,18 +107,25 @@ def main():
 	while True:
 		clock.tick(60)
 		win.fill((128, 128, 128))	
-		rock = ImageButton(win, 'images/rock.png', (150, 150), (20, 20))
-		paper = ImageButton(win, 'images/paper.png', (150, 150), (20, 180))
-		scissors = ImageButton(win, 'images/scissors.png', (150, 150), (20, 330))
+		btn_1 = ImageButton(win, 'images/red/red_0.jpg', (75, 150), (20, 40), '')
+		btn_2 = ImageButton(win, 'images/green/green_0.jpg', (75, 150), (60, 40), '')
+		btn_3 = ImageButton(win, 'images/wild_4.jpg', (75, 150), (100, 40), '')
+		btn_4 = ImageButton(win, 'images/wild_color.jpg', (75, 150), (140, 40), '')
+		btn_1.draw()
+		btn_2.draw()
+		btn_3.draw()
+		btn_4.draw()
 		mx, my = pygame.mouse.get_pos()
 
 		if click:
-			if rock.click((mx, my)):
-				print('ROCK CLICKED')
-			if paper.click((mx, my)):
-				print('PAPER CLICKED')
-			if scissors.click((mx, my)):
-				print('SCISSORS CLICKED')
+			if btn_4.click((mx, my)):
+				print('BTN4')
+			elif btn_3.click((mx, my)):
+				print('BTN3')
+			elif btn_2.click((mx, my)):
+				print('BTN2')
+			elif btn_1.click((mx, my)):
+				print('BTN1')
 
 		click = False
 		for event in pygame.event.get():
