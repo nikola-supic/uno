@@ -2,8 +2,10 @@
 import socket
 from _thread import start_new_thread
 import pickle
-from game import Game
 import time
+from datetime import datetime
+
+from game import Game
 
 server = 'localhost'
 port = 5555
@@ -37,20 +39,28 @@ def threaded_clinet(conn, p, game_id):
 				if not data:
 					break
 				else:
-					if data == 'get':
+					data_list = data.split()
+					if data_list[0] == 'get':
 						conn.sendall(pickle.dumps(game))
 
-					elif data == 'reset':
+					elif data_list[0] == 'reset':
 						game.reset()
 						conn.sendall(pickle.dumps(game))
 
-					elif data == 'red' or data == 'green' or data == 'blue' or data == 'yellow': 
-						game.use_card(p, int(last_data), data)
+					elif data_list[0] == 'red' or data_list[0] == 'green' or data_list[0] == 'blue' or data_list[0] == 'yellow': 
+						game.use_card(p, int(last_data), data_list[0])
+						conn.sendall(pickle.dumps(game))
+
+					elif data_list[0] == 'msg':
+						data_list.pop(0)
+						msg = ' '.join(data_list)
+
+						game.send_msg(p, msg)
 						conn.sendall(pickle.dumps(game))
 
 					else:
-						last_data = data
-						game.use_card(p, int(data))
+						last_data = data_list[0]
+						game.use_card(p, int(data_list[0]))
 						conn.sendall(pickle.dumps(game))
 			else:
 				break
@@ -59,8 +69,19 @@ def threaded_clinet(conn, p, game_id):
 
 	print('[ - ] Lost connection')
 	try:
-		del games[game_id]
-		print(f'[ - ] Closing game.. (ID: {game_id})')
+		if game_id in games:
+			game = games[game_id]
+			if len(game.messages) > 2:
+				time = datetime.now()
+				time_str = f'{time.day:02d}_{time.month:02d}_{time.year} {time.hour:02d}_{time.minute:02d}_{time.second:02d}'
+				filename = f'chat_history/chat_{time_str}.txt'
+				with open(filename, 'w') as file:
+					game.messages.reverse()
+					for msg in game.messages:
+						file.write(f'# {msg[2]} // Player {msg[0]} // {msg[1]}\n')
+
+			del games[game_id]
+			print(f'[ - ] Closing game.. (ID: {game_id})')
 	except:
 		pass
 

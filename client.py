@@ -6,14 +6,13 @@ from datetime import datetime, timedelta
 
 from game import Game
 from network import Network
-from customs import Text, Button, ImageButton
+from customs import Text, Button, ImageButton, InputBox
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (74, 145, 35)
 BLUE = (45, 77, 109)
-
 YELLOW = (242, 209, 17)
 ORANGE = (242, 118, 9)
 
@@ -278,6 +277,9 @@ class App():
 						else:
 							self.show_info = True
 
+					if chat_btn.click((mx, my)):
+						self.chat_screen(n, player)
+
 				if game.get_player_move() == player:
 					use_idx = None
 					draw_card = False
@@ -290,8 +292,6 @@ class App():
 
 						if drawing_deck.click((mx, my)):
 							draw_card = True
-
-
 
 					if use_idx != None or draw_card:
 						if draw_card:
@@ -382,6 +382,78 @@ class App():
 
 			pygame.display.update()
 			clock.tick(60)
+
+	def chat_screen(self, n, player):
+		pygame.display.set_caption('CLIENT (Uno - Chat)')
+		run = True
+		click = False
+
+		input_text = InputBox(self.screen, (20, self.height - 45), (self.width - 90, 30), '', GREEN, WHITE)
+		input_send = ImageButton(self.screen, 'images/main/send.png', (30, 30), (self.width - 45, self.height - 48), 'info')
+		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (self.width - 45, 20), 'exit')
+
+		while run:
+			try:
+				game = n.send('get')
+			except:
+				self.draw_error('Could not get game... (player left)')
+				pygame.time.delay(2000)
+				run = False
+				break
+
+			self.screen.fill(BLACK)
+			bg = pygame.image.load("images/main/game_bg.jpg")
+			bg = pygame.transform.scale(bg, (self.width, self.height))
+			self.screen.blit(bg, (0, 0))
+
+			input_text.draw()
+			input_send.draw()
+			exit_btn.draw()
+			Text(self.screen, f'TYPING AS PLAYER: {player}', (self.width - 65, 32), WHITE, right=True)
+
+			y = self.height - 60
+			for idx, msg in enumerate(game.messages[:21]):
+				Text(self.screen, f'# {msg[2]} // Player {msg[0]} // {msg[1]}', (20, y), WHITE, text_size=20)
+				y -= 20
+
+			mx, my = pygame.mouse.get_pos()
+			if click:
+				if input_send.click((mx, my)):
+					send_packet = f'msg {input_text.text}'
+					input_text.text = ''
+
+					try:
+						game = n.send(send_packet)
+					except:
+						self.draw_error('Could not get game... (after sending message)')
+						pygame.time.delay(2000)
+						run = False
+						break
+
+				if exit_btn.click((mx, my)):
+					run = False
+					break
+
+			click = False
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					sys.exit()
+
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						run = False
+
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					if event.button == 1:
+						click = True
+
+				input_text.handle_event(event)
+			input_text.update()
+
+			pygame.display.update()
+			clock.tick(60)
+
 
 if __name__ == '__main__':
 	app = App(720, 480)

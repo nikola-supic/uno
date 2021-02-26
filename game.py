@@ -19,6 +19,7 @@ class Game():
 
 		self.wins = [0, 0]
 		self.lobby_started = datetime.now()
+		self.messages = []
 
 	def reset(self):
 		self.winner = None
@@ -223,6 +224,11 @@ class Game():
 		if idx < 0 or idx >= len(self.p_cards[player]):
 			return False
 		return True
+
+	def send_msg(self, player, message):
+		time = datetime.now()
+		time_str = f'{time.hour:02d}:{time.minute:02d}:{time.second:02d}'
+		self.messages.insert(0, [player, message, time_str])
 
 
 class Card():
