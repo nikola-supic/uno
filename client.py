@@ -35,6 +35,8 @@ class App():
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('CLIENT (Uno)')
 
+		self.show_info = False
+
 
 	def main_menu(self):
 		pygame.display.set_caption('CLIENT (Uno - Main Menu)')
@@ -188,18 +190,26 @@ class App():
 		Text(self.screen, f'{len(game.deck_cards)}', (80, self.height/2 - 90), WHITE, center=True)
 
 		# Draw some info
-		duration = int((datetime.now() - game.time_started).total_seconds())
-		lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
-		Text(self.screen, f'WIN: {game.wins[player]}', (self.width - 20, self.height/2 - 60), WHITE, right=True)
-		Text(self.screen, f'LOST: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
-		Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (self.width - 20, self.height/2 - 20), WHITE, right=True)
-		Text(self.screen, f'OPP\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
-		Text(self.screen, f'YOU ARE PLAYER {player}', (self.width - 20, self.height/2 + 20), WHITE, right=True)
-		Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (self.width - 20, self.height/2 + 40), WHITE, right=True)
-		Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (self.width - 20, self.height/2 + 60), WHITE, right=True)
+		if self.show_info:
+			duration = int((datetime.now() - game.time_started).total_seconds())
+			lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
+			Text(self.screen, f'WIN: {game.wins[player]}', (self.width - 20, self.height/2 - 60), WHITE, right=True)
+			Text(self.screen, f'LOST: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
+			Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (self.width - 20, self.height/2 - 20), WHITE, right=True)
+			Text(self.screen, f'OPP\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
+			Text(self.screen, f'YOU ARE PLAYER {player}', (self.width - 20, self.height/2 + 20), WHITE, right=True)
+			Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (self.width - 20, self.height/2 + 40), WHITE, right=True)
+			Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (self.width - 20, self.height/2 + 60), WHITE, right=True)
+
+		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (20, self.height - 45), 'exit')
+		exit_btn.draw()
+		info_btn = ImageButton(self.screen, 'images/main/info.png', (25, 25), (self.width - 45, self.height - 45), 'info')
+		info_btn.draw()
+		chat_btn = ImageButton(self.screen, 'images/main/chat.png', (25, 25), (self.width - 90, self.height - 45), 'info')
+		chat_btn.draw()
 
 		pygame.display.update()
-		return your_deck, deck_img
+		return your_deck, deck_img, exit_btn, info_btn, chat_btn
 
 	def draw_your_card(self, game, player):
 		# constants for cards
@@ -234,7 +244,7 @@ class App():
 			try:
 				game = n.send('get')
 			except:
-				self.draw_error('Could not get game...')
+				self.draw_error('Could not get game... (player left)')
 				pygame.time.delay(2000)
 				run = False
 				break
@@ -249,17 +259,28 @@ class App():
 				try:
 					game = n.send('reset')
 				except:
-					self.draw_error('Could not get game after reset...')
+					self.draw_error('Could not get game... (after reset)')
 					pygame.time.delay(2000)
 					run = False
 					break
 			else:
-				your_deck, drawing_deck = self.draw_cards(game, player)
+				your_deck, drawing_deck, exit_btn, info_btn, chat_btn = self.draw_cards(game, player)
+
+				if click:
+					mx, my = pygame.mouse.get_pos()
+					if exit_btn.click((mx, my)):
+						run = False
+						break
+
+					if info_btn.click((mx, my)):
+						if self.show_info:
+							self.show_info = False
+						else:
+							self.show_info = True
 
 				if game.get_player_move() == player:
 					use_idx = None
 					draw_card = False
-					mx, my = pygame.mouse.get_pos()
 					if click:
 						your_deck.reverse()
 						for card in your_deck:
@@ -269,6 +290,7 @@ class App():
 
 						if drawing_deck.click((mx, my)):
 							draw_card = True
+
 
 
 					if use_idx != None or draw_card:
