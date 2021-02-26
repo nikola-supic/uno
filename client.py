@@ -2,6 +2,7 @@
 import pygame
 import pickle
 import sys
+from datetime import datetime, timedelta
 
 from game import Game
 from network import Network
@@ -187,11 +188,15 @@ class App():
 		Text(self.screen, f'{len(game.deck_cards)}', (80, self.height/2 - 90), WHITE, center=True)
 
 		# Draw some info
+		duration = int((datetime.now() - game.time_started).total_seconds())
+		lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
 		Text(self.screen, f'WIN: {game.wins[player]}', (self.width - 20, self.height/2 - 60), WHITE, right=True)
 		Text(self.screen, f'LOST: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
 		Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (self.width - 20, self.height/2 - 20), WHITE, right=True)
 		Text(self.screen, f'OPP\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
 		Text(self.screen, f'YOU ARE PLAYER {player}', (self.width - 20, self.height/2 + 20), WHITE, right=True)
+		Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (self.width - 20, self.height/2 + 40), WHITE, right=True)
+		Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (self.width - 20, self.height/2 + 60), WHITE, right=True)
 
 		pygame.display.update()
 		return your_deck, deck_img

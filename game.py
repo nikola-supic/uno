@@ -1,5 +1,6 @@
 # game.py
-import random
+from random import shuffle
+from datetime import datetime
 
 class Game():
 	def __init__(self, id):
@@ -14,8 +15,10 @@ class Game():
 		self.direction = 1
 		self.pick_color = False
 		self.moves = [0, 0]
+		self.time_started = 0
 
 		self.wins = [0, 0]
+		self.lobby_started = datetime.now()
 
 	def reset(self):
 		self.winner = None
@@ -70,7 +73,7 @@ class Game():
 			deck.append(Card('WILDCOLOR', 'WILD', -1, 'images/wild_color.jpg'))
 			deck.append(Card('WILD4', 'WILD', -1, 'images/wild_4.jpg'))
 
-		random.shuffle(deck)
+		shuffle(deck)
 		return deck
 
 	def remove_special(self):
@@ -97,6 +100,7 @@ class Game():
 		self.ground_deck.append(self.last_card)
 
 		# Set first move player
+		self.time_started = datetime.now()
 		self.player_on_move = self.get_first_move()
 
 	def get_first_move(self):
