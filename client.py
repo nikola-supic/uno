@@ -31,7 +31,7 @@ class App():
 		self.height = height
 
 		self.screen = pygame.display.set_mode((width, height))
-		icon = pygame.image.load("images/main/icon.png")
+		icon = pygame.image.load("images/main/logo.png")
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('CLIENT (Uno)')
 
@@ -162,32 +162,37 @@ class App():
 			bg = pygame.transform.scale(bg, (self.width, self.height))
 			self.screen.blit(bg, (0, 0))
 
-			Text(self.screen, 'UNO - MAIN MENU', (20, 25), WHITE, text_size=40)
-			button_2v2 = Button(self.screen, 'Play 2v2', (20, 80), (120, 40), ORANGE, border=2, border_color=BLACK)
-			button_3v3 = Button(self.screen, 'Play 3v3', (20, 130), (120, 40), ORANGE, border=2, border_color=BLACK)
-			button_options = Button(self.screen, 'Options', (20, 180), (120, 40), ORANGE, border=2, border_color=BLACK)
-			button_exit = Button(self.screen, 'Exit', (20, 230), (120, 40), ORANGE, border=2, border_color=BLACK)
-			button_2v2.draw()
-			button_3v3.draw()
-			button_options.draw()
+			Text(self.screen, 'UNO GAME', (self.width/2, 40), ORANGE, text_size=72, center=True)
+			Text(self.screen, 'MAIN MENU', (self.width/2, 70), WHITE, text_size=24, center=True)
+
+			button_logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
+			button_logo.draw()
+
+			button_play = ImageButton(self.screen, 'images/main/start.png', (120, 120), (self.width/2 - 60, self.height/2 - 50), 'start')
+			button_play.draw()
+			Text(self.screen, 'PLAY', (self.width/2, self.height/2 + 80), WHITE, text_size=24, center=True)
+
+			button_settings = ImageButton(self.screen, 'images/main/settings.png', (120, 120), (70, self.height/2 - 70), 'settings')
+			button_settings.draw()
+			Text(self.screen, 'SETTINGS', (70 + 60, self.height/2 + 60), WHITE, text_size=24, center=True)
+
+			button_exit = ImageButton(self.screen, 'images/main/main_exit.png', (140, 140), (self.width - 210, self.height/2 - 80), 'exit')
 			button_exit.draw()
+			Text(self.screen, 'EXIT', (self.width - 210 + 70, self.height/2 + 60), WHITE, text_size=24, center=True)
+
 			Text(self.screen, 'GAME BY: SULE', (20, self.height-20), WHITE, text_size=14)
 
 			mx, my = pygame.mouse.get_pos()
-			if button_2v2.rect.collidepoint((mx, my)):
-				if click:
+			if click:
+				if button_play.click((mx, my)):
 					self.game_2v2()
-			if button_3v3.rect.collidepoint((mx, my)):
-				if click:
-					self.wait_lobby()
-			if button_options.rect.collidepoint((mx, my)):
-				if click:
+				elif button_settings.click((mx, my)):	
 					self.options()
-			if button_exit.rect.collidepoint((mx, my)):
-				if click:
+				elif button_exit.click((mx, my)):
 					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
+
 
 			click = False
 			for event in pygame.event.get():
