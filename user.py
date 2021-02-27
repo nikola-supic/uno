@@ -46,6 +46,34 @@ def check_register(username, email, password, birthday):
 	
 	return False
 
+def give_win(id):
+	sql = "SELECT wins FROM users WHERE id=%s"
+	val = (id, )
+
+	mycursor.execute(sql, val)
+	result = mycursor.fetchone()
+	wins = result[0] + 1
+
+	sql = "UPDATE users SET wins=%s WHERE id=%s"
+	val = (wins, id, )
+
+	mycursor.execute(sql, val)
+	mydb.commit()
+
+def give_defeat(id):
+	sql = "SELECT defeats FROM users WHERE id=%s"
+	val = (id, )
+
+	mycursor.execute(sql, val)
+	result = mycursor.fetchone()
+	defeats = result[0] + 1
+
+	sql = "UPDATE users SET defeats=%s WHERE id=%s"
+	val = (defeats, id, )
+
+	mycursor.execute(sql, val)
+	mydb.commit()
+
 
 class User():
 	"""

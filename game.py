@@ -2,6 +2,8 @@
 from random import shuffle
 from datetime import datetime
 
+import user
+
 class Game():
 	def __init__(self, id):
 		self.id = id
@@ -221,6 +223,15 @@ class Game():
 		if self.check_is_winner(player):
 			self.wins[player] += 1
 			self.winner = self.user_names[player]
+
+			opp = None
+			if player == 0:
+				opp = 1
+			else:
+				opp = 0
+
+			user.give_win(self.user_ids[player])
+			user.give_defeat(self.user_ids[opp])
 
 
 	def valid_input(self, player, idx):

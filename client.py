@@ -256,8 +256,8 @@ class App():
 		bg = pygame.image.load("images/main/winner.jpg")
 		bg = pygame.transform.scale(bg, (self.width, self.height))
 		self.screen.blit(bg, (0, 0))
-		Text(self.screen, 'WE HAVE A WINNER', (self.width/2, 25), BLACK, text_size=40, center=True)
-		Text(self.screen, f'Player {winner}', (self.width/2, 60), BLACK, text_size=40, center=True)
+		Text(self.screen, 'WE HAVE A WINNER !', (self.width/2, 25), BLACK, text_size=40, center=True)
+		Text(self.screen, f'{winner}', (self.width/2, 60), BLACK, text_size=40, center=True)
 
 		pygame.display.update()
 
