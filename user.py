@@ -107,3 +107,44 @@ class User():
 
 		mycursor.execute(sql, val)
 		mydb.commit()
+
+	def change_username(self, name):
+		if len(name) < 4:
+			return False
+
+		self.username = name
+		sql = "UPDATE users SET username=%s WHERE id=%s"
+		val = (name, self.id, )
+
+		mycursor.execute(sql, val)
+		mydb.commit()
+
+	def change_email(self, email):
+		if len(email) < 4:
+			return False
+
+		self.email = email
+		sql = "UPDATE users SET email=%s WHERE id=%s"
+		val = (email, self.id, )
+
+		mycursor.execute(sql, val)
+		mydb.commit()
+
+	def change_password(self, password):
+		if len(password) < 8 or len(password) > 24:
+			return False
+
+		self.password = password
+		sql = "UPDATE users SET password=%s WHERE id=%s"
+		val = (password, self.id, )
+
+		mycursor.execute(sql, val)
+		mydb.commit()
+
+	def change_birthday(self, birthday):
+		self.birthday = birthday
+		sql = "UPDATE users SET birthday=%s WHERE id=%s"
+		val = (birthday, self.id, )
+
+		mycursor.execute(sql, val)
+		mydb.commit()

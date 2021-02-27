@@ -217,13 +217,62 @@ class App():
 	def options(self):
 		pygame.display.set_caption('CLIENT (Uno - Options)')
 		run = True
+		click = False
+		
+		username = InputBox(self.screen, (self.width/2 - 150, 130), (300, 30), '', WHITE, BLACK)
+		email = InputBox(self.screen, (self.width/2 - 150, 180), (300, 30), '', WHITE, BLACK)
+		password = InputBox(self.screen, (self.width/2 - 150, 230), (300, 30), '', WHITE, BLACK)
+		birthday = InputBox(self.screen, (self.width/2 - 150, 280), (300, 30), '', WHITE, BLACK)
+		save = Button(self.screen, 'SAVE INFO', (self.width/2 - 150, 320), (300, 30), WHITE, text_color=BLACK, border=2, border_color=BLACK)
+		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (20, self.height - 45), 'exit')
 		while run:
 			self.screen.fill(BLACK)
 			bg = pygame.image.load("images/main/background.jpg")
 			bg = pygame.transform.scale(bg, (self.width, self.height))
 			self.screen.blit(bg, (0, 0))
-			Text(self.screen, 'UNO - OPTIONS', (20, 25), WHITE, text_size=40)
+			Text(self.screen, 'UNO GAME', (self.width/2, 40), ORANGE, text_size=72, center=True)
+			Text(self.screen, 'OPTIONS', (self.width/2, 70), WHITE, text_size=24, center=True)
+			Text(self.screen, 'TO CHANGE INFO, ENTER NEW INFO AND PRESS SAVE', (self.width/2, 100), WHITE, text_size=20, center=True)
 
+			Text(self.screen, f'Current username: {self.user.username}', (self.width/2, 120), BLACK, text_size=18, center=True)
+			username.draw()
+			Text(self.screen, f'Current e-mail: {self.user.email}', (self.width/2, 170), BLACK, text_size=18, center=True)
+			email.draw()
+			Text(self.screen, f'Current password: {self.user.password}', (self.width/2, 220), BLACK, text_size=18, center=True)
+			password.draw()
+			Text(self.screen, f'Current birthday: {self.user.birthday} (YYYY-MM-DD)', (self.width/2, 270), BLACK, text_size=18, center=True)
+			birthday.draw()
+
+			save.draw()
+
+			Text(self.screen, f'Your wins: {self.user.wins}', (self.width/2, 360), WHITE, text_size=18, center=True)
+			Text(self.screen, f'Your defeats: {self.user.defeats}', (self.width/2, 380), WHITE, text_size=18, center=True)
+			Text(self.screen, f'REGISTRATION DATE: {self.user.register_date}', (self.width/2, 400), WHITE, text_size=18, center=True)
+
+			exit_btn.draw()
+
+			mx, my = pygame.mouse.get_pos()
+			if click:
+				if save.rect.collidepoint((mx, my)):
+					if username.text != '':
+						username.text.replace(' ', '_')
+						self.user.change_username(username.text)
+						username.clear()
+					elif email.text != '':
+						self.user.change_email(email.text)
+						email.clear()
+					elif password.text != '':
+						self.user.change_password(password.text)
+						password.clear()
+					elif birthday.text != '':
+						date_object = datetime.strptime(birthday.text, '%Y-%m-%d')
+						self.user.change_birthday(date_object.date())
+						birthday.clear()
+
+				if exit_btn.click((mx, my)):
+					run = False
+
+			click = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					self.user.user_quit()
@@ -233,6 +282,20 @@ class App():
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_ESCAPE:
 						run = False
+
+				if event.type == pygame.MOUSEBUTTONUP:
+					if event.button == 1:
+						click = True
+
+				username.handle_event(event)
+				email.handle_event(event)
+				password.handle_event(event)
+				birthday.handle_event(event)
+
+			username.update()
+			email.update()
+			password.update()
+			birthday.update()
 
 			pygame.display.update()
 			clock.tick(60)

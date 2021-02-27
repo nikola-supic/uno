@@ -91,9 +91,6 @@ def threaded_clinet(conn, p, game_id):
 					for msg in game.messages:
 						file.write(f'# {msg[2]} // Player {msg[0]} // {msg[1]}\n')
 
-			# 
-
-
 			del games[game_id]
 			print(f'[ - ] Closing game.. (ID: {game_id})')
 	except:
