@@ -1,4 +1,13 @@
-# network.py
+"""
+Created on Wed Feb 24 21:17:20 2021
+
+@author: Sule
+@name: network.py
+@description: ->
+    DOCSTRING:
+"""
+#!/usr/bin/env python3
+
 import socket
 import pickle
 import json

@@ -1,4 +1,13 @@
-# game.py
+"""
+Created on Wed Feb 24 21:24:57 2021
+
+@author: Sule
+@name: game.py
+@description: ->
+    DOCSTRING:
+"""
+#!/usr/bin/env python3
+
 from random import shuffle
 from datetime import datetime
 

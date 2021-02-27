@@ -1,3 +1,13 @@
+"""
+Created on Wed Feb 24 21:16:43 2021
+
+@author: Sule
+@name: customs.py
+@description: ->
+    DOCSTRING:
+"""
+#!/usr/bin/env python3
+
 import pygame
 
 class Button():

@@ -1,4 +1,13 @@
-# server.py
+"""
+Created on Wed Feb 24 21:18:22 2021
+
+@author: Sule
+@name: server.py
+@description: ->
+    DOCSTRING:
+"""
+#!/usr/bin/env python3
+
 import socket
 from _thread import start_new_thread
 import pickle

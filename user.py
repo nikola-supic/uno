@@ -1,4 +1,12 @@
-# user.py
+"""
+Created on Sat Feb 27 11:15:37 2021
+
+@author: Sule
+@name: user.py
+@description: ->
+    DOCSTRING:
+"""
+#!/usr/bin/env python3
 
 from datetime import datetime, timedelta
 import mysql.connector

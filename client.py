@@ -1,4 +1,13 @@
-# client.py
+"""
+Created on Wed Feb 24 21:19:02 2021
+
+@author: Sule
+@name: client.py
+@description: ->
+	DOCSTRING:
+"""
+#!/usr/bin/env python3
+
 import pygame
 import pickle
 import sys
