@@ -99,6 +99,12 @@ class InputBox():
         self.txt_surface = font.render(text, True, self.color)
         self.active = False
 
+    def clear(self):
+        self.text = ''
+        font = pygame.font.Font(None, 24)
+        self.txt_surface = font.render(self.text, True, self.color)
+        self.draw()
+
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -111,7 +117,6 @@ class InputBox():
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_RETURN:
-                    print(self.text)
                     self.text = ''
                 elif event.key == pygame.K_BACKSPACE:
                     self.text = self.text[:-1]

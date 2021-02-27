@@ -53,11 +53,20 @@ def threaded_clinet(conn, p, game_id):
 
 					elif data_list[0] == 'msg':
 						data_list.pop(0)
+						username = data_list[0]
+						data_list.pop(0)
 						msg = ' '.join(data_list)
 
-						game.send_msg(p, msg)
+						game.send_msg(username, msg)
 						conn.sendall(pickle.dumps(game))
 
+					elif data_list[0] == 'username':
+						data_list.pop(0)
+						user_name = data_list[0]
+						user_id = int(data_list[1])
+
+						game.update_users(p, user_name, user_id)
+						conn.sendall(pickle.dumps(game))
 					else:
 						last_data = data_list[0]
 						game.use_card(p, int(data_list[0]))
@@ -71,6 +80,8 @@ def threaded_clinet(conn, p, game_id):
 	try:
 		if game_id in games:
 			game = games[game_id]
+
+			# Save message history
 			if len(game.messages) > 2:
 				time = datetime.now()
 				time_str = f'{time.day:02d}_{time.month:02d}_{time.year} {time.hour:02d}_{time.minute:02d}_{time.second:02d}'
@@ -79,6 +90,9 @@ def threaded_clinet(conn, p, game_id):
 					game.messages.reverse()
 					for msg in game.messages:
 						file.write(f'# {msg[2]} // Player {msg[0]} // {msg[1]}\n')
+
+			# 
+
 
 			del games[game_id]
 			print(f'[ - ] Closing game.. (ID: {game_id})')

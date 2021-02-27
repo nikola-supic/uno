@@ -7,10 +7,11 @@ from datetime import datetime, timedelta
 from game import Game
 from network import Network
 from customs import Text, Button, ImageButton, InputBox
+import user
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
+RED = (244, 0, 38)
 GREEN = (74, 145, 35)
 BLUE = (45, 77, 109)
 YELLOW = (242, 209, 17)
@@ -34,8 +35,123 @@ class App():
 		pygame.display.set_icon(icon)
 		pygame.display.set_caption('CLIENT (Uno)')
 
+		self.user = None
 		self.show_info = False
 
+	def welcome(self):
+		pygame.display.set_caption('CLIENT (Uno - Welcome)')
+		click = False
+
+		# Create left part of screen
+		login_name = InputBox(self.screen, (40, self.height - 170), (200, 30), '', RED, BLACK)
+		login_pass = InputBox(self.screen, (40, self.height - 120), (200, 30), '', RED, BLACK)
+		login_button = Button(self.screen, 'LOGIN', (40, self.height - 80), (200, 40), RED, text_color=BLACK, border=2, border_color=BLACK)
+
+		# Create right part of screen
+		register_name = InputBox(self.screen, (self.width - 270, 70), (230, 30), '', RED, BLACK)
+		register_mail = InputBox(self.screen, (self.width - 270, 120), (230, 30), '', RED, BLACK)
+		register_pass = InputBox(self.screen, (self.width - 270, 170), (230, 30), '', RED, BLACK)
+		register_date = InputBox(self.screen, (self.width - 270, 220), (230, 30), '', RED, BLACK)
+		register_button = Button(self.screen, 'REGISTER', (self.width - 270, 260), (230, 40), RED, text_color=BLACK, border=2, border_color=BLACK)
+
+		while True:
+			self.screen.fill(BLACK)
+			bg = pygame.image.load("images/main/welcome.png")
+			bg = pygame.transform.scale(bg, (self.width, self.height))
+			self.screen.blit(bg, (0, 0))
+
+			Text(self.screen, 'WELCOME TO UNO GAME', (40, 30), BLACK, text_size=44)
+			Text(self.screen, 'PLEASE ENTER YOUR INFORMATION', (40, 50), RED, text_size=20)
+			Text(self.screen, 'GAME BY: SULE', (self.width-40, self.height-40), BLACK, text_size=14, right=True)
+
+			# Draw left part of screen
+			Text(self.screen, 'ENTER USERNAME:', (40, self.height - 180), BLACK, text_size=18)
+			login_name.draw()
+			Text(self.screen, 'ENTER PASSWORD:', (40, self.height - 130), BLACK, text_size=18)
+			login_pass.draw()
+			login_button.draw()
+
+			# Draw right part of screen
+			Text(self.screen, 'ENTER USERNAME:', (self.width - 40, 60), BLACK, text_size=18, right=True)
+			register_name.draw()
+			Text(self.screen, 'ENTER E-MAIL:', (self.width - 40, 110), BLACK, text_size=18, right=True)
+			register_mail.draw()
+			Text(self.screen, 'ENTER PASSWORD:', (self.width - 40, 160), BLACK, text_size=18, right=True)
+			register_pass.draw()
+			Text(self.screen, 'ENTER BIRTHDAY (DD.MM.YYYY):', (self.width - 40, 210), BLACK, text_size=18, right=True)
+			register_date.draw()
+			register_button.draw()
+
+			mx, my = pygame.mouse.get_pos()
+			if login_button.rect.collidepoint((mx, my)):
+				if click:
+					self.user = user.check_login(login_name.text, login_pass.text)
+					if self.user != None:
+						self.main_menu()
+					else:
+						Text(self.screen, 'WRONG USERNAME OR PASSWORD.', (self.width - 40, 320), RED, text_size=22, right=True)
+						login_name.clear()
+						login_pass.clear()
+
+						pygame.display.update()
+						pygame.time.delay(1500)
+
+			if register_button.rect.collidepoint((mx, my)):
+				if click:
+					register_name.text.replace(' ', '_')
+					date_object = datetime.strptime(register_date.text, '%d.%m.%Y')
+
+					if user.check_register(register_name.text, register_mail.text, register_pass.text, date_object.date()):
+						register_name.clear()
+						register_mail.clear()
+						register_pass.clear()
+						register_date.clear()
+						
+						Text(self.screen, 'SUCCESSFULY REGISTERED, USE THAT INFO TO LOGIN.', (self.width - 40, 320), RED, text_size=22, right=True)
+						pygame.display.update()
+						pygame.time.delay(1500)
+					else:
+						register_name.clear()
+						register_mail.clear()
+						register_pass.clear()
+						register_date.clear()
+						
+						Text(self.screen, 'YOU ENTERED SOME WRONG INFO. TRY AGAIN.', (self.width - 40, 320), RED, text_size=22, right=True)
+						pygame.display.update()
+						pygame.time.delay(1500)
+
+
+			click = False
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					sys.exit()
+
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						pygame.quit()
+						sys.exit()
+
+				if event.type == pygame.MOUSEBUTTONUP:
+					if event.button == 1:
+						click = True
+
+				login_name.handle_event(event)
+				login_pass.handle_event(event)
+				register_name.handle_event(event)
+				register_mail.handle_event(event)
+				register_pass.handle_event(event)
+				register_date.handle_event(event)
+
+			login_name.update()
+			login_pass.update()
+			register_name.update()
+			register_mail.update()
+			register_pass.update()
+			register_date.update()
+
+			pygame.display.update()
+			clock.tick(60)
 
 	def main_menu(self):
 		pygame.display.set_caption('CLIENT (Uno - Main Menu)')
@@ -69,21 +185,24 @@ class App():
 					self.options()
 			if button_exit.rect.collidepoint((mx, my)):
 				if click:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
 			click = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_ESCAPE:
+						self.user.user_quit()
 						pygame.quit()
 						sys.exit()
 
-				if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.type == pygame.MOUSEBUTTONUP:
 					if event.button == 1:
 						click = True
 
@@ -102,6 +221,7 @@ class App():
 
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
@@ -189,13 +309,17 @@ class App():
 		Text(self.screen, f'{len(game.deck_cards)}', (80, self.height/2 - 90), WHITE, center=True)
 
 		# Draw some info
+		Text(self.screen, f'{game.user_names[player]} (you)', (20, 20), WHITE)
+		Text(self.screen, f'vs', (20, 33), WHITE, text_size=16)
+		Text(self.screen, f'{game.user_names[opp]} (opponent)', (20, 47), WHITE)
+
 		if self.show_info:
 			duration = int((datetime.now() - game.time_started).total_seconds())
 			lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
 			Text(self.screen, f'WIN: {game.wins[player]}', (self.width - 20, self.height/2 - 60), WHITE, right=True)
-			Text(self.screen, f'LOST: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
+			Text(self.screen, f'DEFEATS: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
 			Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (self.width - 20, self.height/2 - 20), WHITE, right=True)
-			Text(self.screen, f'OPP\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
+			Text(self.screen, f'{game.user_names[opp]}\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
 			Text(self.screen, f'YOU ARE PLAYER {player}', (self.width - 20, self.height/2 + 20), WHITE, right=True)
 			Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (self.width - 20, self.height/2 + 40), WHITE, right=True)
 			Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (self.width - 20, self.height/2 + 60), WHITE, right=True)
@@ -239,6 +363,15 @@ class App():
 		
 		run = True
 		click = False
+
+		try:
+			send_data = f'username {self.user.username} {self.user.id}'
+			game = n.send(send_data)
+		except:
+			self.draw_error('Could not get game... (after sending username)')
+			pygame.time.delay(2000)
+			run = False
+
 		while run:
 			try:
 				game = n.send('get')
@@ -318,6 +451,7 @@ class App():
 			click = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
@@ -325,7 +459,7 @@ class App():
 					if event.key == pygame.K_ESCAPE:
 						run = False
 
-				if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.type == pygame.MOUSEBUTTONUP:
 					if event.button == 1:
 						click = True
 
@@ -369,6 +503,7 @@ class App():
 			click = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
@@ -376,7 +511,7 @@ class App():
 					if event.key == pygame.K_ESCAPE:
 						run = False
 
-				if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.type == pygame.MOUSEBUTTONUP:
 					if event.button == 1:
 						click = True
 
@@ -409,18 +544,18 @@ class App():
 			input_text.draw()
 			input_send.draw()
 			exit_btn.draw()
-			Text(self.screen, f'TYPING AS PLAYER: {player}', (self.width - 65, 32), WHITE, right=True)
+			Text(self.screen, f'TYPING AS USER: {self.user.username}',(self.width - 65, 32), WHITE, right=True)
 
 			y = self.height - 60
 			for idx, msg in enumerate(game.messages[:21]):
-				Text(self.screen, f'# {msg[2]} // Player {msg[0]} // {msg[1]}', (20, y), WHITE, text_size=20)
+				Text(self.screen, f'# {msg[2]} // {msg[0]} // {msg[1]}', (20, y), WHITE, text_size=20)
 				y -= 20
 
 			mx, my = pygame.mouse.get_pos()
 			if click:
 				if input_send.click((mx, my)):
-					send_packet = f'msg {input_text.text}'
-					input_text.text = ''
+					send_packet = f'msg {self.user.username} {input_text.text}'
+					input_text.clear()
 
 					try:
 						game = n.send(send_packet)
@@ -437,6 +572,7 @@ class App():
 			click = False
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
+					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
 
@@ -444,7 +580,7 @@ class App():
 					if event.key == pygame.K_ESCAPE:
 						run = False
 
-				if event.type == pygame.MOUSEBUTTONDOWN:
+				if event.type == pygame.MOUSEBUTTONUP:
 					if event.button == 1:
 						click = True
 
@@ -457,4 +593,4 @@ class App():
 
 if __name__ == '__main__':
 	app = App(720, 480)
-	app.main_menu()
+	app.welcome()

@@ -17,6 +17,8 @@ class Game():
 		self.moves = [0, 0]
 		self.time_started = 0
 
+		self.user_names = ['', '']
+		self.user_ids = [0, 0]
 		self.wins = [0, 0]
 		self.lobby_started = datetime.now()
 		self.messages = []
@@ -31,6 +33,7 @@ class Game():
 		self.direction = 1
 		self.pick_color = False
 		self.moves = [0, 0]
+		self.time_started = 0
 		self.give_cards()
 
 	def connected(self):
@@ -217,7 +220,7 @@ class Game():
 
 		if self.check_is_winner(player):
 			self.wins[player] += 1
-			self.winner = player
+			self.winner = self.user_names[player]
 
 
 	def valid_input(self, player, idx):
@@ -225,10 +228,14 @@ class Game():
 			return False
 		return True
 
-	def send_msg(self, player, message):
+	def send_msg(self, username, message):
 		time = datetime.now()
 		time_str = f'{time.hour:02d}:{time.minute:02d}:{time.second:02d}'
-		self.messages.insert(0, [player, message, time_str])
+		self.messages.insert(0, [username, message, time_str])
+
+	def update_users(self, player, username, id):
+		self.user_names[player] = username
+		self.user_ids[player] = id
 
 
 class Card():
