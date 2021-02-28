@@ -13,19 +13,20 @@ import pickle
 import json
 
 class Network():
-	def __init__(self):
+	def __init__(self, lobby_size):
 		self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.server = 'localhost'
 		self.port = 5555
 		self.addr = (self.server, self.port)
-		self.p = self.connect()
+		self.p = self.connect(lobby_size)
 
 	def get_p(self):
 		return self.p
 
-	def connect(self):
+	def connect(self, lobby_size):
 		try:
 			self.client.connect(self.addr)
+			self.client.send(str.encode(str(lobby_size)))
 			return self.client.recv(2048).decode()
 		except:
 			pass

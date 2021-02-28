@@ -26,6 +26,12 @@ BLUE = (45, 77, 109)
 YELLOW = (242, 209, 17)
 ORANGE = (242, 118, 9)
 
+CARD_WIDTH = 80
+CARD_HEIGHT = 140
+
+DECK_WIDTH = 60
+DECK_HEIGHT = 100
+
 pygame.font.init()
 pygame.init()
 clock = pygame.time.Clock()
@@ -165,6 +171,13 @@ class App():
 	def main_menu(self):
 		pygame.display.set_caption('CLIENT (Uno - Main Menu)')
 		click = False
+
+		button_logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
+		button_settings = ImageButton(self.screen, 'images/main/settings.png', (120, 120), (70, self.height/2 - 70), 'settings')
+		button_play = ImageButton(self.screen, 'images/main/start.png', (120, 120), (self.width/2 - 60, self.height/2 - 50), 'start')
+		input_lobby = InputBox(self.screen, (self.width/2 - 100, self.height/2 + 90), (200, 30), '', ORANGE, WHITE)
+		button_exit = ImageButton(self.screen, 'images/main/main_exit.png', (140, 140), (self.width - 210, self.height/2 - 80), 'exit')
+
 		while True:
 			self.screen.fill(BLACK)
 			bg = pygame.image.load("images/main/background.jpg")
@@ -173,35 +186,44 @@ class App():
 
 			Text(self.screen, 'UNO GAME', (self.width/2, 40), ORANGE, text_size=72, center=True)
 			Text(self.screen, 'MAIN MENU', (self.width/2, 70), WHITE, text_size=24, center=True)
-
-			button_logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
+			Text(self.screen, 'GAME BY: SULE', (20, self.height-20), WHITE, text_size=14)
 			button_logo.draw()
 
-			button_play = ImageButton(self.screen, 'images/main/start.png', (120, 120), (self.width/2 - 60, self.height/2 - 50), 'start')
-			button_play.draw()
-			Text(self.screen, 'PLAY', (self.width/2, self.height/2 + 80), WHITE, text_size=24, center=True)
-
-			button_settings = ImageButton(self.screen, 'images/main/settings.png', (120, 120), (70, self.height/2 - 70), 'settings')
 			button_settings.draw()
 			Text(self.screen, 'SETTINGS', (70 + 60, self.height/2 + 60), WHITE, text_size=24, center=True)
-
-			button_exit = ImageButton(self.screen, 'images/main/main_exit.png', (140, 140), (self.width - 210, self.height/2 - 80), 'exit')
+			button_play.draw()
+			Text(self.screen, 'PLAY', (self.width/2, self.height/2 - 70), WHITE, text_size=24, center=True)
+			Text(self.screen, 'ENTER LOBBY SIZE:', (self.width/2, self.height/2 + 80), WHITE, text_size=18, center=True)
+			input_lobby.draw()
 			button_exit.draw()
 			Text(self.screen, 'EXIT', (self.width - 210 + 70, self.height/2 + 60), WHITE, text_size=24, center=True)
-
-			Text(self.screen, 'GAME BY: SULE', (20, self.height-20), WHITE, text_size=14)
 
 			mx, my = pygame.mouse.get_pos()
 			if click:
 				if button_play.click((mx, my)):
-					self.game_2v2()
+					try:
+						lobby_size = int(input_lobby.text)
+
+						if lobby_size < 2 or lobby_size > 6:
+							Text(self.screen, 'You need to enter number between 2 and 6.', (self.width/2, self.height-40), ORANGE, text_size=24, center=True)
+							input_lobby.clear()
+							pygame.display.update()
+							pygame.time.delay(1000)
+
+						else:
+							self.start_game(lobby_size)
+					except ValueError:
+						Text(self.screen, 'You need to enter number between 2 and 6.', (self.width/2, self.height-40), ORANGE, text_size=24, center=True)
+						input_lobby.clear()
+						pygame.display.update()
+						pygame.time.delay(1000)
+
 				elif button_settings.click((mx, my)):	
 					self.options()
 				elif button_exit.click((mx, my)):
 					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
-
 
 			click = False
 			for event in pygame.event.get():
@@ -219,6 +241,9 @@ class App():
 				if event.type == pygame.MOUSEBUTTONUP:
 					if event.button == 1:
 						click = True
+
+				input_lobby.handle_event(event)
+			input_lobby.update()
 
 			pygame.display.update()
 			clock.tick(60)
@@ -339,102 +364,151 @@ class App():
 		pygame.display.update()
 
 	def draw_cards(self, game, player):
-		pygame.display.set_caption('CLIENT (Uno - Game 2v2)')
+		pygame.display.set_caption(f'CLIENT (Uno - Lobby {game.lobby_size})')
 		self.screen.fill(BLACK)
 		bg = pygame.image.load("images/main/game_bg.jpg")
 		bg = pygame.transform.scale(bg, (self.width, self.height))
 		self.screen.blit(bg, (0, 0))
 
-		# constants for cards
-		card_width = 80
-		card_height = 160
+		# Find opponents
+		opponents = [i for i in range(game.lobby_size) if player != i]
 
-		# Find opponent
-		opp = None
-		if player == 0:
-			opp = 1
-		else:
-			opp = 0
-
-		# Find lenght of opponent deck
-		cards = game.p_cards[opp]
-		all_width = 0
-		for idx, card in enumerate(cards):
-			all_width += (card_width / 2)
-		all_width += (card_width / 2)
-
-		# Draw opponent deck
-		x = (self.width / 2) - (all_width / 2)
-		for idx, card in enumerate(cards):
-			img = ImageButton(self.screen, 'images/back_of_card.png', (card_width, card_height), (x, -(card_height/2)), idx)
-			img.draw()
-			x += (card_width / 2)
+		# Draw opponnets card
+		self.draw_opponents_cards(game, opponents)
 
 		# Draw your deck
-		your_deck = self.draw_your_card(game, player)
+		your_deck = self.draw_your_cards(game, player)
 
 		# Draw last card and lenght of ground deck
 		last = game.last_card
-		last_img = ImageButton(self.screen, last.img, (card_width, card_height), (self.width/2 - 40, self.height/2 - card_height/2), last)
+		last_img = ImageButton(self.screen, last.img, (CARD_WIDTH, CARD_HEIGHT), (self.width/2 - CARD_WIDTH/2, self.height/2 - CARD_HEIGHT/2), last)
 		last_img.draw()
-		Text(self.screen, f'{len(game.ground_deck)}', (self.width/2, self.height/2 - 90), WHITE, center=True)
-		Text(self.screen, f'{last.color}', (self.width/2, self.height/2 + 95), WHITE, center=True)
+		Text(self.screen, f'{len(game.ground_deck)}', (self.width/2, self.height/2 - 80), WHITE, center=True)
+		Text(self.screen, f'{last.color}', (self.width/2, self.height/2 + 80), WHITE, center=True)
 
 		# Draw deck card and lenght of drawing deck
-		deck_img = ImageButton(self.screen, 'images/back_of_card.png', (card_width, card_height), (40, self.height/2 - card_height/2), game.deck_cards)
+		deck_img = ImageButton(self.screen, 'images/back_of_card.png', (DECK_WIDTH, DECK_HEIGHT), (self.width / 4 - DECK_WIDTH/2, self.height/2 - DECK_HEIGHT/2), game.deck_cards)
 		deck_img.draw()
-		Text(self.screen, f'{len(game.deck_cards)}', (80, self.height/2 - 90), WHITE, center=True)
+		Text(self.screen, f'{len(game.deck_cards)}', (self.width/4, self.height/2 - DECK_HEIGHT/2 - 10), WHITE, center=True)
 
 		# Draw some info
-		Text(self.screen, f'{game.user_names[player]} (you)', (20, 20), WHITE)
-		Text(self.screen, f'vs', (20, 33), WHITE, text_size=16)
-		Text(self.screen, f'{game.user_names[opp]} (opponent)', (20, 47), WHITE)
-
 		if self.show_info:
 			duration = int((datetime.now() - game.time_started).total_seconds())
 			lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
-			Text(self.screen, f'WIN: {game.wins[player]}', (self.width - 20, self.height/2 - 60), WHITE, right=True)
-			Text(self.screen, f'DEFEATS: {game.wins[opp]}', (self.width - 20, self.height/2 - 40), WHITE, right=True)
-			Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (self.width - 20, self.height/2 - 20), WHITE, right=True)
-			Text(self.screen, f'{game.user_names[opp]}\'s MOVES: {game.moves[opp]}', (self.width - 20, self.height/2), WHITE, right=True)
-			Text(self.screen, f'YOU ARE PLAYER {player}', (self.width - 20, self.height/2 + 20), WHITE, right=True)
-			Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (self.width - 20, self.height/2 + 40), WHITE, right=True)
-			Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (self.width - 20, self.height/2 + 60), WHITE, right=True)
+			Text(self.screen, f'WIN: {game.wins[player]}', (20, self.height-120), WHITE)
+			Text(self.screen, f'DEFEATS: {game.get_defeats(player)}', (20, self.height-100), WHITE)
+			Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (20, self.height-80), WHITE)
+			Text(self.screen, f'YOU ARE PLAYER {player}', (20, self.height-60), WHITE)
+			Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (20, self.height-40), WHITE)
+			Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (20, self.height-20), WHITE)
+		else:
+			y = self.height - 15
+			for idx, opp in enumerate(opponents):
+				Text(self.screen, f'#{idx+1} // {game.user_names[opp]}', (15, y), WHITE, text_size=18)
+				y -= 15
 
-		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (20, self.height - 45), 'exit')
+		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (self.width - 45, self.height - 45), 'exit')
 		exit_btn.draw()
-		info_btn = ImageButton(self.screen, 'images/main/info.png', (25, 25), (self.width - 45, self.height - 45), 'info')
+		info_btn = ImageButton(self.screen, 'images/main/info.png', (25, 25), (self.width - 90, self.height - 45), 'info')
 		info_btn.draw()
-		chat_btn = ImageButton(self.screen, 'images/main/chat.png', (25, 25), (self.width - 90, self.height - 45), 'info')
+		chat_btn = ImageButton(self.screen, 'images/main/chat.png', (25, 25), (self.width - 135, self.height - 45), 'info')
 		chat_btn.draw()
 
 		pygame.display.update()
 		return your_deck, deck_img, exit_btn, info_btn, chat_btn
 
-	def draw_your_card(self, game, player):
-		# constants for cards
-		card_width = 80
-		card_height = 160
-
+	def draw_your_cards(self, game, player):
 		# Find lenght of your deck
 		cards = game.p_cards[player]
-		all_width = 0
-		for idx, card in enumerate(cards):
-			all_width += (card_width / 2)
-		all_width += (card_width / 2)
+		all_width = self.get_width(cards)
 
 		# Draw your deck
 		your_deck = []
 		x = (self.width / 2) - (all_width / 2)
 		for idx, card in enumerate(cards):
-			img = ImageButton(self.screen, card.img, (card_width, card_height), (x, self.height - (card_height/2)), idx)
+			img = ImageButton(self.screen, card.img, (CARD_WIDTH, CARD_HEIGHT), (x, self.height - (CARD_HEIGHT/2)), idx)
 			your_deck.append(img)
 			img.draw()
-			x += (card_width / 2)
+			x += (CARD_WIDTH / 2)
 		return your_deck
 
-	def game_2v2(self):
-		n = Network()
+	def draw_opponents_cards(self, game, opponents):
+		if len(opponents) == 1:
+			self.draw_top_cards(game.p_cards[opponents[0]])
+
+		elif len(opponents) == 2:
+			self.draw_left_cards(game.p_cards[opponents[0]])
+			self.draw_top_cards(game.p_cards[opponents[1]])
+
+		elif len(opponents) == 3:
+			self.draw_left_cards(game.p_cards[opponents[0]])
+			self.draw_top_cards(game.p_cards[opponents[1]])
+			self.draw_right_cards(game.p_cards[opponents[2]])
+
+		elif len(opponents) == 4:
+			self.draw_left_cards(game.p_cards[opponents[0]])
+			self.draw_topleft_cards(game.p_cards[opponents[1]])
+			self.draw_top_cards(game.p_cards[opponents[2]])
+			self.draw_right_cards(game.p_cards[opponents[3]])
+
+		elif len(opponents) == 5:
+			self.draw_left_cards(game.p_cards[opponents[0]])
+			self.draw_topleft_cards(game.p_cards[opponents[1]])
+			self.draw_top_cards(game.p_cards[opponents[2]])
+			self.draw_topright_cards(game.p_cards[opponents[3]])
+			self.draw_right_cards(game.p_cards[opponents[4]])
+
+	def draw_top_cards(self, cards):
+		# Find lenght of deck
+		all_width = self.get_width(cards)
+		# Draw deck
+		x = (self.width / 2) - (all_width / 2)
+		for idx, card in enumerate(cards):
+			img = ImageButton(self.screen, 'images/back_of_card.png', (CARD_WIDTH, CARD_HEIGHT), (x, -(CARD_HEIGHT/2)), idx)
+			img.draw()
+			x += (CARD_WIDTH / 2)
+
+	def draw_left_cards(self, cards):
+		# Find lenght of deck
+		all_width = self.get_width(cards)
+		# Draw deck
+		y = (self.height / 2) - (all_width / 2)
+		for idx, card in enumerate(cards):
+			img = ImageButton(self.screen, 'images/back_of_card.png', (CARD_WIDTH, CARD_HEIGHT), (-(CARD_HEIGHT/2), y), idx, 90)
+			img.draw()
+			y += (CARD_WIDTH / 2)
+
+	def draw_right_cards(self, cards):
+		# Find lenght of deck
+		all_width = self.get_width(cards)
+		# Draw deck
+		y = (self.height / 2) - (all_width / 2)
+		for idx, card in enumerate(cards):
+			img = ImageButton(self.screen, 'images/back_of_card.png', (CARD_WIDTH, CARD_HEIGHT), (self.width - (CARD_HEIGHT/2), y), idx, 90)
+			img.draw()
+			y += (CARD_WIDTH / 2)
+
+	def draw_topleft_cards(self, cards):
+		card_len = len(cards) 
+		img = ImageButton(self.screen, 'images/back_of_card.png', (CARD_WIDTH, CARD_HEIGHT), (-CARD_WIDTH, -(CARD_HEIGHT/2)), card_len, 45)
+		img.draw()
+		Text(self.screen, f'{card_len}', (20, 20), WHITE, text_size=40)
+
+	def draw_topright_cards(self, cards):
+		card_len = len(cards) 
+		img = ImageButton(self.screen, 'images/back_of_card.png', (CARD_WIDTH, CARD_HEIGHT), (self.width - CARD_WIDTH, -(CARD_HEIGHT/2)), card_len, -45)
+		img.draw()
+		Text(self.screen, f'{card_len}', (self.width-20, 20), WHITE, text_size=40, right=True)
+
+	def get_width(self, cards):
+		all_width = 0
+		for idx, card in enumerate(cards):
+			all_width += (CARD_WIDTH / 2)
+		all_width += (CARD_WIDTH / 2)
+		return all_width
+
+	def start_game(self, lobby_size):
+		n = Network(lobby_size)
 		player = int(n.get_p())
 		print(f'[ + ] You are player: {player}')
 		
@@ -564,7 +638,7 @@ class App():
 			blue.draw()
 			red.draw()
 
-			self.draw_your_card(game, player)
+			self.draw_your_cards(game, player)
 
 			mx, my = pygame.mouse.get_pos()
 			if click:

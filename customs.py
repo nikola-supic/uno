@@ -76,16 +76,21 @@ class ImageButton():
     DOCSTRING:
 
     """
-    def __init__(self, surface, image, size, pos, alt_text):
+    def __init__(self, surface, image, size, pos, alt_text, rotation=0):
         self.surface = surface
         self.image = image
         self.size = size
         self.pos = pos
         self.alt_text = alt_text
+        self.rotation = rotation
 
     def draw(self):
         bg = pygame.image.load(self.image)
         bg = pygame.transform.scale(bg, self.size)
+
+        if self.rotation != 0:
+            bg = pygame.transform.rotate(bg, self.rotation)
+
         self.surface.blit(bg, self.pos)
         return bg
 

@@ -14,23 +14,26 @@ from datetime import datetime
 import user
 
 class Game():
-	def __init__(self, id):
+	def __init__(self, id, lobby_size):
 		self.id = id
+		self.lobby_size = lobby_size
+		self.joined = 1
 		self.ready = False
 		self.winner = None
 		self.player_on_move = None
 		self.deck_cards = self.create_deck()
-		self.p_cards = [[], []]
+		self.p_cards = [[] for _ in range(lobby_size)]
 		self.last_card = None
 		self.ground_deck = []
 		self.direction = 1
 		self.pick_color = False
-		self.moves = [0, 0]
+		self.moves = [0 for _ in range(lobby_size)]
 		self.time_started = 0
+		self.next_skip = False 
 
-		self.user_names = ['', '']
-		self.user_ids = [0, 0]
-		self.wins = [0, 0]
+		self.user_names = ['' for _ in range(lobby_size)]
+		self.user_ids = [0 for _ in range(lobby_size)]
+		self.wins = [0 for _ in range(lobby_size)]
 		self.lobby_started = datetime.now()
 		self.messages = []
 
@@ -38,12 +41,12 @@ class Game():
 		self.winner = None
 		self.player_on_move = None
 		self.deck_cards = self.create_deck()
-		self.p_cards = [[], []]
+		self.p_cards = [[] for _ in range(self.lobby_size)]
 		self.last_card = None
 		self.ground_deck = []
 		self.direction = 1
 		self.pick_color = False
-		self.moves = [0, 0]
+		self.moves = [0 for _ in range(self.lobby_size)]
 		self.time_started = 0
 		self.give_cards()
 
@@ -60,6 +63,14 @@ class Game():
 
 	def give_win(self, player):
 		self.wins[player] += 1
+
+	def get_defeats(self, player):
+		defeats = 0
+		for idx, wins in enumerate(self.wins):
+			if player != idx:
+				defeats += wins
+		return defeats
+
 
 	def create_deck(self):
 		deck = []
@@ -101,8 +112,8 @@ class Game():
 		self.remove_special()
 
 		# Give 7 cards each player
-		for idx, card in enumerate(self.deck_cards[:14]):
-			player = idx % 2
+		for idx, card in enumerate(self.deck_cards[:7 * self.lobby_size]):
+			player = idx % self.lobby_size
 			self.p_cards[player].append(card)
 
 			self.deck_cards.pop(0)
@@ -138,13 +149,14 @@ class Game():
 	def draw(self, player, draw_len):
 		# Check if deck has enough card, use ground cards to recreate
 		if len(self.deck_cards) <= draw_len:
+
 			self.ground_deck.pop()
 
 			for card in self.deck_cards:
 				self.ground_deck.append(card)
 
 			self.deck_cards = self.ground_deck
-			random.shuffle(self.deck_cards)
+			shuffle(self.deck_cards)
 
 			self.ground_deck = []
 			self.ground_deck.append(self.last_card)
@@ -156,7 +168,7 @@ class Game():
 
 
 	def skip(self):
-		self.reverse()
+		self.next_skip = True
 
 	def reverse(self):
 		if self.direction == 1:
@@ -166,12 +178,25 @@ class Game():
 
 	def set_next_on_move(self):
 		self.player_on_move = self.get_next()
+		if self.next_skip:
+			self.next_skip = False
+			self.player_on_move = self.get_next()
 
 	def get_next(self):
-		if self.player_on_move == 0:
-			return 1
+		next_player = None
+		if self.direction == 1:
+			if self.player_on_move == self.lobby_size-1:
+				next_player = 0
+			else:
+				next_player = self.player_on_move + 1
 		else:
-			return 0
+			if self.player_on_move == 0:
+				next_player = self.lobby_size-1
+			else:
+				next_player = self.player_on_move - 1
+
+		return next_player 
+
 
 	def can_use_card(self, card):
 		if card.type == 'WILD4' or card.type == 'WILDCOLOR':
@@ -197,11 +222,13 @@ class Game():
 				self.draw(self.get_next(), 2)
 
 			elif card.type == 'REVERSE':
-				on_move_again = True
+				if self.lobby_size == 2:
+					on_move_again = True
 				self.reverse()
 
 			elif card.type == 'SKIP':
-				on_move_again = True
+				if self.lobby_size == 2:
+					on_move_again = True
 				self.skip()
 
 			elif card.type == 'WILDCOLOR':
@@ -233,14 +260,11 @@ class Game():
 			self.wins[player] += 1
 			self.winner = self.user_names[player]
 
-			opp = None
-			if player == 0:
-				opp = 1
-			else:
-				opp = 0
-
-			user.give_win(self.user_ids[player])
-			user.give_defeat(self.user_ids[opp])
+			for i in range(self.lobby_size):
+				if player == i:
+					user.give_win(self.user_ids[i])
+				else:
+					user.give_defeat(self.user_ids[i])
 
 
 	def valid_input(self, player, idx):

@@ -23,7 +23,7 @@ except mysql.connector.errors.InterfaceError:
 	print('[-] Cant connect to DB.')
 
 def check_login(username, password):
-	sql = "SELECT * FROM users WHERE username=%s AND password=%s AND online=0"
+	sql = "SELECT * FROM users WHERE username=%s AND password=%s"
 	val = (username, password)
 
 	mycursor.execute(sql, val)
