@@ -178,7 +178,8 @@ class Game():
 
 	def set_next_on_move(self):
 		self.player_on_move = self.get_next()
-		if self.next_skip:
+
+		if self.lobby_size > 2 and self.next_skip:
 			self.next_skip = False
 			self.player_on_move = self.get_next()
 

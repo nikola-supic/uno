@@ -130,7 +130,22 @@ def see_pw(id):
 	result = mycursor.fetchone()
 	return result[0]
 
+def last_online(id):
+	try:
+		user_id = int(id)
+	except ValueError:
+		return False
 
+	sql = "SELECT last_online FROM users WHERE id=%s"
+	val = (user_id, )
+	mycursor.execute(sql, val)
+	result = mycursor.fetchone()
+	return result[0]
+
+def online_players():
+	mycursor.execute("SELECT id, username FROM users WHERE online=1")
+	result = mycursor.fetchall()
+	return result
 
 class User():
 	"""

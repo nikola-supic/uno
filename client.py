@@ -194,7 +194,7 @@ class App():
 			button_settings.draw()
 			Text(self.screen, 'SETTINGS', (70 + 60, self.height/2 + 60), WHITE, text_size=24, center=True)
 			button_play.draw()
-			Text(self.screen, 'PLAY', (self.width/2, self.height/2 - 70), WHITE, text_size=24, center=True)
+			Text(self.screen, 'PLAY', (self.width/2, self.height/2 - 60), WHITE, text_size=24, center=True)
 			Text(self.screen, 'ENTER LOBBY SIZE:', (self.width/2, self.height/2 + 80), WHITE, text_size=18, center=True)
 			input_lobby.draw()
 			button_exit.draw()
@@ -348,13 +348,16 @@ class App():
 		pygame.display.set_caption('CLIENT (Uno - Admin Panel)')
 		run = True
 		click = False
+		see_online = False
 
-		admin_permission = InputBox(self.screen, (self.width/2 - 150, 150), (300, 30), '', WHITE, BLACK)
-		ban_player = InputBox(self.screen, (self.width/2 - 150, 200), (300, 30), '', WHITE, BLACK)
-		reset_stats = InputBox(self.screen, (self.width/2 - 150, 250), (300, 30), '', WHITE, BLACK)
-		see_pw = InputBox(self.screen, (self.width/2 - 150, 300), (300, 30), '', WHITE, BLACK)
+		admin_permission = InputBox(self.screen, (self.width/2 - 150, 130), (300, 30), '', WHITE, BLACK)
+		ban_player = InputBox(self.screen, (self.width/2 - 150, 180), (300, 30), '', WHITE, BLACK)
+		reset_stats = InputBox(self.screen, (self.width/2 - 150, 230), (300, 30), '', WHITE, BLACK)
+		see_pw = InputBox(self.screen, (self.width/2 - 150, 280), (300, 30), '', WHITE, BLACK)
+		last_online = InputBox(self.screen, (self.width/2 - 150, 330), (300, 30), '', WHITE, BLACK)
 		
-		save = Button(self.screen, 'REFRESH', (self.width/2 - 150, 340), (300, 30), WHITE, text_color=BLACK, border=2, border_color=BLACK)
+		online_players = Button(self.screen, 'SEE ONLINE PLAYERS', (self.width/2 - 150, 370), (300, 30), WHITE, text_color=BLACK, border=2, border_color=BLACK)
+		refresh = Button(self.screen, 'REFRESH', (self.width/2 - 150, 410), (300, 30), WHITE, text_color=BLACK, border=2, border_color=BLACK)
 		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (20, self.height - 45), 'exit')
 		while run:
 			self.screen.fill(BLACK)
@@ -365,21 +368,31 @@ class App():
 			Text(self.screen, 'ADMIN PANEL', (self.width/2, 70), WHITE, text_size=24, center=True)
 			Text(self.screen, 'PLEASE BE CAREFUL WHILE USING THIS ADMIN PANEL', (self.width/2, 100), WHITE, text_size=20, center=True)
 
-			Text(self.screen, 'GIVE ADMIN PERMISSIONS: (User ID)', (self.width/2, 140), WHITE, text_size=18, center=True)
+			Text(self.screen, 'GIVE ADMIN PERMISSIONS: (User ID)', (self.width/2, 120), WHITE, text_size=18, center=True)
 			admin_permission.draw()
-			Text(self.screen, 'BAN USER FROM GAME: (User ID)', (self.width/2, 190), WHITE, text_size=18, center=True)
+			Text(self.screen, 'BAN USER FROM GAME: (User ID)', (self.width/2, 170), WHITE, text_size=18, center=True)
 			ban_player.draw()
-			Text(self.screen, 'RESET WINS / DEFEATS: (User ID)', (self.width/2, 240), WHITE, text_size=18, center=True)
+			Text(self.screen, 'RESET WINS / DEFEATS: (User ID)', (self.width/2, 220), WHITE, text_size=18, center=True)
 			reset_stats.draw()
-			Text(self.screen, 'SEE PASSWORD: (User ID)', (self.width/2, 290), WHITE, text_size=18, center=True)
+			Text(self.screen, 'SEE PASSWORD: (User ID)', (self.width/2, 270), WHITE, text_size=18, center=True)
 			see_pw.draw()
+			Text(self.screen, 'LAST ONLINE: (User ID)', (self.width/2, 320), WHITE, text_size=18, center=True)
+			last_online.draw()
 
-			save.draw()
+			online_players.draw()
+			refresh.draw()
 			exit_btn.draw()
+
+			if see_online:
+				result = user.online_players()
+				y = 140
+				for row in result:
+					Text(self.screen, f'#{row[0]} // {row[1]}', (self.width-20, y), WHITE, text_size=16, right=True)
+					y += 15
 
 			mx, my = pygame.mouse.get_pos()
 			if click:
-				if save.rect.collidepoint((mx, my)):
+				if refresh.rect.collidepoint((mx, my)):
 					if admin_permission.text != '':
 						user.admin_permission(admin_permission.text)
 
@@ -403,9 +416,24 @@ class App():
 						pw = user.see_pw(see_pw.text)
 						see_pw.clear()
 
-						Text(self.screen, f'User ID: {user_id} // PW: {pw}', (self.width/2, 380), WHITE, text_size=20, center=True)
+						Text(self.screen, f'User ID: {user_id} // PW: {pw}', (self.width/2, 450), WHITE, text_size=20, center=True)
 						pygame.display.update()
 						pygame.time.delay(2000)
+
+					if last_online.text != '':
+						user_id = last_online.text
+						online = user.last_online(last_online.text)
+						last_online.clear()
+
+						Text(self.screen, f'User ID: {user_id} // Last Online: {online}', (self.width/2, 450), WHITE, text_size=20, center=True)
+						pygame.display.update()
+						pygame.time.delay(2000)
+
+				if online_players.rect.collidepoint((mx, my)):
+					if see_online:
+						see_online = False
+					else:
+						see_online = True
 
 				if exit_btn.click((mx, my)):
 					run = False
@@ -429,11 +457,13 @@ class App():
 				ban_player.handle_event(event)
 				reset_stats.handle_event(event)
 				see_pw.handle_event(event)
+				last_online.handle_event(event)
 
 			admin_permission.update()
 			ban_player.update()
 			reset_stats.update()
 			see_pw.update()
+			last_online.update()
 
 			pygame.display.update()
 			clock.tick(60)
@@ -637,7 +667,7 @@ class App():
 				game = n.send('get')
 			except:
 				self.draw_error('Could not get game... (player left)')
-				pygame.time.delay(2000)
+				pygame.time.delay(1000)
 				run = False
 				break
 
