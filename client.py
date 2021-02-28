@@ -402,7 +402,6 @@ class App():
 						user_id = see_pw.text
 						pw = user.see_pw(see_pw.text)
 						see_pw.clear()
-						pygame.display.update()
 
 						Text(self.screen, f'User ID: {user_id} // PW: {pw}', (self.width/2, 380), WHITE, text_size=20, center=True)
 						pygame.display.update()
