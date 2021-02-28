@@ -172,7 +172,8 @@ class App():
 		pygame.display.set_caption('CLIENT (Uno - Main Menu)')
 		click = False
 
-		button_logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
+		logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
+		button_admin = ImageButton(self.screen, 'images/main/admin.png', (40, 40), (20, self.height - 70), 'admin')
 		button_settings = ImageButton(self.screen, 'images/main/settings.png', (120, 120), (70, self.height/2 - 70), 'settings')
 		button_play = ImageButton(self.screen, 'images/main/start.png', (120, 120), (self.width/2 - 60, self.height/2 - 50), 'start')
 		input_lobby = InputBox(self.screen, (self.width/2 - 100, self.height/2 + 90), (200, 30), '', ORANGE, WHITE)
@@ -187,7 +188,8 @@ class App():
 			Text(self.screen, 'UNO GAME', (self.width/2, 40), ORANGE, text_size=72, center=True)
 			Text(self.screen, 'MAIN MENU', (self.width/2, 70), WHITE, text_size=24, center=True)
 			Text(self.screen, 'GAME BY: SULE', (20, self.height-20), WHITE, text_size=14)
-			button_logo.draw()
+			logo.draw()
+			button_admin.draw()
 
 			button_settings.draw()
 			Text(self.screen, 'SETTINGS', (70 + 60, self.height/2 + 60), WHITE, text_size=24, center=True)
@@ -203,10 +205,10 @@ class App():
 				if button_play.click((mx, my)):
 					try:
 						lobby_size = int(input_lobby.text)
+						input_lobby.clear()
 
 						if lobby_size < 2 or lobby_size > 6:
 							Text(self.screen, 'You need to enter number between 2 and 6.', (self.width/2, self.height-40), ORANGE, text_size=24, center=True)
-							input_lobby.clear()
 							pygame.display.update()
 							pygame.time.delay(1000)
 
@@ -224,6 +226,14 @@ class App():
 					self.user.user_quit()
 					pygame.quit()
 					sys.exit()
+
+				elif button_admin.click((mx, my)):
+					if self.user.admin:
+						self.admin_panel()
+					else:
+						Text(self.screen, 'You do not have admin permissions.', (self.width/2, self.height-40), ORANGE, text_size=24, center=True)
+						pygame.display.update()
+						pygame.time.delay(1000)
 
 			click = False
 			for event in pygame.event.get():
@@ -333,6 +343,102 @@ class App():
 
 			pygame.display.update()
 			clock.tick(60)
+
+	def admin_panel(self):
+		pygame.display.set_caption('CLIENT (Uno - Admin Panel)')
+		run = True
+		click = False
+
+		admin_permission = InputBox(self.screen, (self.width/2 - 150, 150), (300, 30), '', WHITE, BLACK)
+		ban_player = InputBox(self.screen, (self.width/2 - 150, 200), (300, 30), '', WHITE, BLACK)
+		reset_stats = InputBox(self.screen, (self.width/2 - 150, 250), (300, 30), '', WHITE, BLACK)
+		see_pw = InputBox(self.screen, (self.width/2 - 150, 300), (300, 30), '', WHITE, BLACK)
+		
+		save = Button(self.screen, 'REFRESH', (self.width/2 - 150, 340), (300, 30), WHITE, text_color=BLACK, border=2, border_color=BLACK)
+		exit_btn = ImageButton(self.screen, 'images/main/exit.png', (25, 25), (20, self.height - 45), 'exit')
+		while run:
+			self.screen.fill(BLACK)
+			bg = pygame.image.load("images/main/background.jpg")
+			bg = pygame.transform.scale(bg, (self.width, self.height))
+			self.screen.blit(bg, (0, 0))
+			Text(self.screen, 'UNO GAME', (self.width/2, 40), ORANGE, text_size=72, center=True)
+			Text(self.screen, 'ADMIN PANEL', (self.width/2, 70), WHITE, text_size=24, center=True)
+			Text(self.screen, 'PLEASE BE CAREFUL WHILE USING THIS ADMIN PANEL', (self.width/2, 100), WHITE, text_size=20, center=True)
+
+			Text(self.screen, 'GIVE ADMIN PERMISSIONS: (User ID)', (self.width/2, 140), WHITE, text_size=18, center=True)
+			admin_permission.draw()
+			Text(self.screen, 'BAN USER FROM GAME: (User ID)', (self.width/2, 190), WHITE, text_size=18, center=True)
+			ban_player.draw()
+			Text(self.screen, 'RESET WINS / DEFEATS: (User ID)', (self.width/2, 240), WHITE, text_size=18, center=True)
+			reset_stats.draw()
+			Text(self.screen, 'SEE PASSWORD: (User ID)', (self.width/2, 290), WHITE, text_size=18, center=True)
+			see_pw.draw()
+
+			save.draw()
+			exit_btn.draw()
+
+			mx, my = pygame.mouse.get_pos()
+			if click:
+				if save.rect.collidepoint((mx, my)):
+					if admin_permission.text != '':
+						user.admin_permission(admin_permission.text)
+
+						admin_permission.clear()
+						pygame.display.update()
+
+					if ban_player.text != '':
+						user.ban_player(ban_player.text)
+
+						ban_player.clear()
+						pygame.display.update()
+
+					if reset_stats.text != '':
+						user.reset_stats(reset_stats.text)
+
+						reset_stats.clear()
+						pygame.display.update()
+
+					if see_pw.text != '':
+						user_id = see_pw.text
+						pw = user.see_pw(see_pw.text)
+						see_pw.clear()
+						pygame.display.update()
+
+						Text(self.screen, f'User ID: {user_id} // PW: {pw}', (self.width/2, 380), WHITE, text_size=20, center=True)
+						pygame.display.update()
+						pygame.time.delay(2000)
+
+				if exit_btn.click((mx, my)):
+					run = False
+
+			click = False
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					self.user.user_quit()
+					pygame.quit()
+					sys.exit()
+
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_ESCAPE:
+						run = False
+
+				if event.type == pygame.MOUSEBUTTONUP:
+					if event.button == 1:
+						click = True
+
+				admin_permission.handle_event(event)
+				ban_player.handle_event(event)
+				reset_stats.handle_event(event)
+				see_pw.handle_event(event)
+
+			admin_permission.update()
+			ban_player.update()
+			reset_stats.update()
+			see_pw.update()
+
+			pygame.display.update()
+			clock.tick(60)
+
 
 	def draw_lobby(self):
 		self.screen.fill(BLACK)

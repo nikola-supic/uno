@@ -82,6 +82,55 @@ def give_defeat(id):
 	mycursor.execute(sql, val)
 	mydb.commit()
 
+def admin_permission(id):
+	try:
+		user_id = int(id)
+	except ValueError:
+		return False
+
+	sql = "UPDATE users SET admin=1 WHERE id=%s"
+	val = (user_id, )
+
+	mycursor.execute(sql, val)
+	mydb.commit()
+
+def ban_player(id):
+	try:
+		user_id = int(id)
+	except ValueError:
+		return False
+
+	sql = "DELETE FROM users WHERE id=%s"
+	val = (user_id, )
+
+	mycursor.execute(sql, val)
+	mydb.commit()
+
+def reset_stats(id):
+	try:
+		user_id = int(id)
+	except ValueError:
+		return False
+
+	sql = "UPDATE users SET wins=0, defeats=0 WHERE id=%s"
+	val = (user_id, )
+
+	mycursor.execute(sql, val)
+	mydb.commit()
+
+def see_pw(id):
+	try:
+		user_id = int(id)
+	except ValueError:
+		return False
+
+	sql = "SELECT password FROM users WHERE id=%s"
+	val = (user_id, )
+	mycursor.execute(sql, val)
+	result = mycursor.fetchone()
+	return result[0]
+
+
 
 class User():
 	"""
@@ -97,8 +146,9 @@ class User():
 		self.wins = result[5]
 		self.defeats = result[6]
 		self.register_date = result[7]
-		self.last_online = datetime.now()
-		self.online = True
+		self.last_online = datetime.now() # 8
+		self.online = True # 9
+		self.admin = result[10]
 
 		sql = "UPDATE users SET last_online=%s, online=1 WHERE id=%s"
 		val = (self.last_online, self.id, )
