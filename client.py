@@ -439,12 +439,16 @@ class App():
 			clock.tick(60)
 
 
-	def draw_lobby(self):
+	def draw_lobby(self, game):
 		self.screen.fill(BLACK)
 		bg = pygame.image.load("images/main/lobby.jpg")
 		bg = pygame.transform.scale(bg, (self.width, self.height))
 		self.screen.blit(bg, (0, 0))
-		Text(self.screen, 'LOBBY - WAITING FOR PLAYER TO JOIN', (self.width/2, 25), WHITE, text_size=40, center=True)
+		duration = int((datetime.now() - game.lobby_started).total_seconds())
+
+		Text(self.screen, 'WAITING FOR PLAYERS...', (self.width/2, 40), WHITE, text_size=64, center=True)
+		Text(self.screen, f'WAITING TIME: {timedelta(seconds=duration)}', (self.width/2, 70), WHITE, text_size=24, center=True)
+		Text(self.screen, f'JOINED: {game.joined} / {game.lobby_size}', (self.width/2, 90), WHITE, text_size=24, center=True)
 
 		pygame.display.update()
 
@@ -638,7 +642,7 @@ class App():
 				break
 
 			if not game.connected():
-				self.draw_lobby()
+				self.draw_lobby(game)
 
 			elif game.winner != None:
 				self.draw_winner(game.winner)
