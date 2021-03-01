@@ -48,13 +48,13 @@ class App():
 		self.screen = pygame.display.set_mode((width, height))
 		icon = pygame.image.load("images/main/logo.png")
 		pygame.display.set_icon(icon)
-		pygame.display.set_caption('CLIENT (Uno)')
+		pygame.display.set_caption('UNO')
 
 		self.user = None
 		self.show_info = False
 
 	def welcome(self):
-		pygame.display.set_caption('CLIENT (Uno - Welcome)')
+		pygame.display.set_caption('UNO (Welcome)')
 		click = False
 
 		# Create left part of screen
@@ -169,7 +169,6 @@ class App():
 			clock.tick(60)
 
 	def main_menu(self):
-		pygame.display.set_caption('CLIENT (Uno - Main Menu)')
 		click = False
 
 		logo = ImageButton(self.screen, 'images/main/logo.png', (64, 45), (20, 20), 'logo')
@@ -180,6 +179,8 @@ class App():
 		button_exit = ImageButton(self.screen, 'images/main/main_exit.png', (140, 140), (self.width - 210, self.height/2 - 80), 'exit')
 
 		while True:
+			pygame.display.set_caption('UNO (Main Menu)')
+
 			self.screen.fill(BLACK)
 			bg = pygame.image.load("images/main/background.jpg")
 			bg = pygame.transform.scale(bg, (self.width, self.height))
@@ -259,7 +260,7 @@ class App():
 			clock.tick(60)
 
 	def options(self):
-		pygame.display.set_caption('CLIENT (Uno - Options)')
+		pygame.display.set_caption('UNO (Options)')
 		run = True
 		click = False
 		
@@ -345,7 +346,7 @@ class App():
 			clock.tick(60)
 
 	def admin_panel(self):
-		pygame.display.set_caption('CLIENT (Uno - Admin Panel)')
+		pygame.display.set_caption('UNO (Admin Panel)')
 		run = True
 		click = False
 		see_online = False
@@ -476,9 +477,9 @@ class App():
 		self.screen.blit(bg, (0, 0))
 		duration = int((datetime.now() - game.lobby_started).total_seconds())
 
-		Text(self.screen, 'WAITING FOR PLAYERS...', (self.width/2, 40), WHITE, text_size=64, center=True)
-		Text(self.screen, f'WAITING TIME: {timedelta(seconds=duration)}', (self.width/2, 70), WHITE, text_size=24, center=True)
-		Text(self.screen, f'JOINED: {game.joined} / {game.lobby_size}', (self.width/2, 90), WHITE, text_size=24, center=True)
+		Text(self.screen, 'Waiting for players to join...', (self.width/2, 40), WHITE, text_size=64, center=True)
+		Text(self.screen, f'Waiting time: {timedelta(seconds=duration)}', (self.width/2, 70), WHITE, text_size=24, center=True)
+		Text(self.screen, f'Players joined: {game.joined} / {game.lobby_size}', (self.width/2, 90), WHITE, text_size=24, center=True)
 
 		pygame.display.update()
 
@@ -503,7 +504,7 @@ class App():
 		pygame.display.update()
 
 	def draw_cards(self, game, player):
-		pygame.display.set_caption(f'CLIENT (Uno - Lobby {game.lobby_size})')
+		pygame.display.set_caption(f'UNO (Lobby {game.lobby_size})')
 		self.screen.fill(BLACK)
 		bg = pygame.image.load("images/main/game_bg.jpg")
 		bg = pygame.transform.scale(bg, (self.width, self.height))
@@ -534,12 +535,11 @@ class App():
 		if self.show_info:
 			duration = int((datetime.now() - game.time_started).total_seconds())
 			lobby_duration = int((datetime.now() - game.lobby_started).total_seconds())
-			Text(self.screen, f'WIN: {game.wins[player]}', (20, self.height-120), WHITE)
-			Text(self.screen, f'DEFEATS: {game.get_defeats(player)}', (20, self.height-100), WHITE)
-			Text(self.screen, f'YOUR MOVES: {game.moves[player]}', (20, self.height-80), WHITE)
-			Text(self.screen, f'YOU ARE PLAYER {player}', (20, self.height-60), WHITE)
-			Text(self.screen, f'GAME DURATION: {timedelta(seconds=duration)}', (20, self.height-40), WHITE)
-			Text(self.screen, f'LOBBY DURATION: {timedelta(seconds=lobby_duration)}', (20, self.height-20), WHITE)
+			Text(self.screen, f'Wins: {game.wins[player]}', (15, self.height-75), WHITE, text_size=18)
+			Text(self.screen, f'Defeats: {game.get_defeats(player)}', (15, self.height-60), WHITE, text_size=18)
+			Text(self.screen, f'Moves: {game.moves[player]}', (15, self.height-45), WHITE, text_size=18)
+			Text(self.screen, f'Game duration: {timedelta(seconds=duration)}', (15, self.height-30), WHITE, text_size=18)
+			Text(self.screen, f'Lobby duration: {timedelta(seconds=lobby_duration)}', (15, self.height-15), WHITE, text_size=18)
 		else:
 			y = self.height - 15
 			for idx, opp in enumerate(opponents):
@@ -718,7 +718,7 @@ class App():
 
 					if use_idx != None or draw_card:
 						if draw_card:
-							Text(self.screen, 'DRAWING CARD...', (self.width/2, self.height-120), WHITE, text_size=40, center=True)
+							Text(self.screen, 'Drawing card (+1)...', (self.width/2, self.height-120), WHITE, text_size=40, center=True)
 							pygame.display.update()
 							pygame.time.delay(1000)
 							game = n.send(str(-1))
@@ -731,12 +731,13 @@ class App():
 									color = self.pick_color_screen(game, player)
 									game = n.send(color)
 							else:
-								Text(self.screen, 'CAN NOT USE THAT CARD...', (self.width/2, self.height-120), WHITE, text_size=40, center=True)
+								Text(self.screen, 'You can not use that card...', (self.width/2, self.height-120), WHITE, text_size=40, center=True)
 								pygame.display.update()
 								pygame.time.delay(1000)
 
 				else:
-					Text(self.screen, 'OPPONENT\'s MOVE. WAITING...', (self.width/2, 120), WHITE, text_size=40, center=True)
+					on_move = game.player_on_move
+					Text(self.screen, f'{game.user_names[on_move]}\'s move. Waiting...', (self.width/2, 120), WHITE, text_size=40, center=True)
 
 			click = False
 			for event in pygame.event.get():
@@ -757,7 +758,7 @@ class App():
 			clock.tick(60)
 
 	def pick_color_screen(self, game, player):
-		pygame.display.set_caption('CLIENT (Uno - Pick Color)')
+		pygame.display.set_caption('UNO (Pick color)')
 		run = True
 		click = False
 		while run:
@@ -809,7 +810,7 @@ class App():
 			clock.tick(60)
 
 	def chat_screen(self, n, player):
-		pygame.display.set_caption('CLIENT (Uno - Chat)')
+		pygame.display.set_caption('UNO (Chat)')
 		run = True
 		click = False
 
