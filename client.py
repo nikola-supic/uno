@@ -692,7 +692,6 @@ class App():
 					else:
 						user.give_defeat(game.user_ids[i])
 
-
 				pygame.time.delay(5000)
 
 
