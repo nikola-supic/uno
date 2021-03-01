@@ -9,49 +9,27 @@ Created on Sat Feb 27 11:15:37 2021
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
-import sqlite3
-from sqlite3 import Error
+import mysql.connector
 
-mydb = None
 try:
-    mydb = sqlite3.connect('users.db')
-    print(f'[ + ] Successfully connected to DB. ({sqlite3.version})')
-except Error as e:
-    print(e)
-    print(f'[ + ] Can not connect to DB.')
-
-mycursor = mydb.cursor()
-mycursor.execute("""
-	CREATE TABLE IF NOT EXISTS users (
-	id integer PRIMARY KEY,
-	username text UNIQUE NOT NULL,
-	email text UNIQUE NOT NULL,
-	password text NOT NULL,
-	birthday text NOT NULL,
-	wins integer DEFAULT 0 NOT NULL,
-	defeats integer DEFAULT 0 NOT NULL,
-	register_date text DEFAULT '0' NOT NULL,
-	last_online text DEFAULT '0' NOT NULL,
-	online integer DEFAULT 0 NOT NULL,
-	admin integer DEFAULT 0 NOT NULL
-	)"""
-)
-mydb.commit()
-
+	mydb = mysql.connector.connect(
+		host='localhost',
+		user='root',
+		passwd='',
+		database='uno'
+		)
+	mycursor = mydb.cursor()
+except mysql.connector.errors.InterfaceError: 
+	print('[-] Cant connect to DB.')
 
 def check_login(username, password):
-	sql = "SELECT * FROM users WHERE username=? AND password=?"
-	val = (username, password, )
+	sql = "SELECT * FROM users WHERE username=%s AND password=%s"
+	val = (username, password)
 
 	mycursor.execute(sql, val)
 	result = mycursor.fetchone()
 
 	if result is not None:
-
-		if result[0] == 1:
-			mycursor.execute("UPDATE users SET admin=1 WHERE id=1")
-			mydb.commit()
-
 		return User(result)
 	return None
 
@@ -65,7 +43,7 @@ def check_register(username, email, password, birthday):
 
 	try:
 		time = datetime.now()
-		sql = "INSERT INTO users (username, email, password, birthday, register_date) VALUES (?, ?, ?, ?, ?)"
+		sql = "INSERT INTO users (username, email, password, birthday, register_date) VALUES (%s, %s, %s, %s, %s)"
 		val = (username, email, password, birthday, time, )
 
 		mycursor.execute(sql, val)
@@ -73,32 +51,32 @@ def check_register(username, email, password, birthday):
 		return True
 	except:
 		pass
+	
 	return False
 
-
 def give_win(id):
-	sql = "SELECT wins FROM users WHERE id=?"
+	sql = "SELECT wins FROM users WHERE id=%s"
 	val = (id, )
 
 	mycursor.execute(sql, val)
 	result = mycursor.fetchone()
 	wins = result[0] + 1
 
-	sql = "UPDATE users SET wins=? WHERE id=?"
+	sql = "UPDATE users SET wins=%s WHERE id=%s"
 	val = (wins, id, )
 
 	mycursor.execute(sql, val)
 	mydb.commit()
 
 def give_defeat(id):
-	sql = "SELECT defeats FROM users WHERE id=?"
+	sql = "SELECT defeats FROM users WHERE id=%s"
 	val = (id, )
 
 	mycursor.execute(sql, val)
 	result = mycursor.fetchone()
 	defeats = result[0] + 1
 
-	sql = "UPDATE users SET defeats=? WHERE id=?"
+	sql = "UPDATE users SET defeats=%s WHERE id=%s"
 	val = (defeats, id, )
 
 	mycursor.execute(sql, val)
@@ -110,7 +88,7 @@ def admin_permission(id):
 	except ValueError:
 		return False
 
-	sql = "UPDATE users SET admin=1 WHERE id=?"
+	sql = "UPDATE users SET admin=1 WHERE id=%s"
 	val = (user_id, )
 
 	mycursor.execute(sql, val)
@@ -122,7 +100,7 @@ def ban_player(id):
 	except ValueError:
 		return False
 
-	sql = "DELETE FROM users WHERE id=?"
+	sql = "DELETE FROM users WHERE id=%s"
 	val = (user_id, )
 
 	mycursor.execute(sql, val)
@@ -134,7 +112,7 @@ def reset_stats(id):
 	except ValueError:
 		return False
 
-	sql = "UPDATE users SET wins=0, defeats=0 WHERE id=?"
+	sql = "UPDATE users SET wins=0, defeats=0 WHERE id=%s"
 	val = (user_id, )
 
 	mycursor.execute(sql, val)
@@ -146,7 +124,7 @@ def see_pw(id):
 	except ValueError:
 		return False
 
-	sql = "SELECT password FROM users WHERE id=?"
+	sql = "SELECT password FROM users WHERE id=%s"
 	val = (user_id, )
 	mycursor.execute(sql, val)
 	result = mycursor.fetchone()
@@ -158,7 +136,7 @@ def last_online(id):
 	except ValueError:
 		return False
 
-	sql = "SELECT last_online FROM users WHERE id=?"
+	sql = "SELECT last_online FROM users WHERE id=%s"
 	val = (user_id, )
 	mycursor.execute(sql, val)
 	result = mycursor.fetchone()
@@ -187,7 +165,7 @@ class User():
 		self.online = True # 9
 		self.admin = result[10]
 
-		sql = "UPDATE users SET last_online=?, online=1 WHERE id=?"
+		sql = "UPDATE users SET last_online=%s, online=1 WHERE id=%s"
 		val = (self.last_online, self.id, )
 
 		mycursor.execute(sql, val)
@@ -197,7 +175,7 @@ class User():
 		self.last_online = datetime.now()
 		self.online = False
 
-		sql = "UPDATE users SET last_online=?, online=0 WHERE id=?"
+		sql = "UPDATE users SET last_online=%s, online=0 WHERE id=%s"
 		val = (self.last_online, self.id, )
 
 		mycursor.execute(sql, val)
@@ -208,7 +186,7 @@ class User():
 			return False
 
 		self.username = name
-		sql = "UPDATE users SET username=? WHERE id=?"
+		sql = "UPDATE users SET username=%s WHERE id=%s"
 		val = (name, self.id, )
 
 		mycursor.execute(sql, val)
@@ -219,7 +197,7 @@ class User():
 			return False
 
 		self.email = email
-		sql = "UPDATE users SET email=? WHERE id=?"
+		sql = "UPDATE users SET email=%s WHERE id=%s"
 		val = (email, self.id, )
 
 		mycursor.execute(sql, val)
@@ -230,7 +208,7 @@ class User():
 			return False
 
 		self.password = password
-		sql = "UPDATE users SET password=? WHERE id=?"
+		sql = "UPDATE users SET password=%s WHERE id=%s"
 		val = (password, self.id, )
 
 		mycursor.execute(sql, val)
@@ -238,7 +216,7 @@ class User():
 
 	def change_birthday(self, birthday):
 		self.birthday = birthday
-		sql = "UPDATE users SET birthday=? WHERE id=?"
+		sql = "UPDATE users SET birthday=%s WHERE id=%s"
 		val = (birthday, self.id, )
 
 		mycursor.execute(sql, val)
