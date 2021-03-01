@@ -559,7 +559,7 @@ class App():
 	def draw_your_cards(self, game, player):
 		# Find lenght of your deck
 		cards = game.p_cards[player]
-		all_width = self.get_width(cards)
+		all_width = self.get_width(cards, len(cards) > 12)
 
 		# Draw your deck
 		your_deck = []
@@ -568,7 +568,11 @@ class App():
 			img = ImageButton(self.screen, card.img, (CARD_WIDTH, CARD_HEIGHT), (x, self.height - (CARD_HEIGHT/2)), idx)
 			your_deck.append(img)
 			img.draw()
-			x += (CARD_WIDTH / 2)
+			if len(cards) > 12:
+				x += (CARD_WIDTH / 3)
+			else:
+				x += (CARD_WIDTH / 2)
+
 		return your_deck
 
 	def draw_opponents_cards(self, game, opponents):
@@ -639,11 +643,16 @@ class App():
 		img.draw()
 		Text(self.screen, f'{card_len}', (self.width-20, 20), WHITE, text_size=40, right=True)
 
-	def get_width(self, cards):
-		all_width = 0
-		for idx, card in enumerate(cards):
-			all_width += (CARD_WIDTH / 2)
-		all_width += (CARD_WIDTH / 2)
+	def get_width(self, cards, smaller=False):
+		if not smaller:
+			all_width = CARD_WIDTH / 2
+			for idx, card in enumerate(cards):
+				all_width += (CARD_WIDTH / 2)
+		else:
+			all_width = CARD_WIDTH / 3
+			for idx, card in enumerate(cards):
+				all_width += (CARD_WIDTH / 3)
+
 		return all_width
 
 	def start_game(self, lobby_size):
