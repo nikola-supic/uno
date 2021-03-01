@@ -114,9 +114,7 @@ class App():
 			if register_button.rect.collidepoint((mx, my)):
 				if click:
 					register_name.text.replace(' ', '_')
-					date_object = datetime.strptime(register_date.text, '%d.%m.%Y')
-
-					if user.check_register(register_name.text, register_mail.text, register_pass.text, date_object.date()):
+					if user.check_register(register_name.text, register_mail.text, register_pass.text, register_date.text):
 						register_name.clear()
 						register_mail.clear()
 						register_pass.clear()
@@ -310,8 +308,8 @@ class App():
 						self.user.change_password(password.text)
 						password.clear()
 					elif birthday.text != '':
-						date_object = datetime.strptime(birthday.text, '%Y-%m-%d')
-						self.user.change_birthday(date_object.date())
+						# date_object = datetime.strptime(birthday.text, '%Y-%m-%d')
+						self.user.change_birthday(birthday.text)
 						birthday.clear()
 
 				if exit_btn.click((mx, my)):
