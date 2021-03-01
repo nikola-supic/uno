@@ -15,9 +15,10 @@ from sqlite3 import Error
 mydb = None
 try:
     mydb = sqlite3.connect('users.db')
-    print(f'Successfully connected to DB. ({sqlite3.version})')
+    print(f'[ + ] Successfully connected to DB. ({sqlite3.version})')
 except Error as e:
     print(e)
+    print(f'[ + ] Can not connect to DB.')
 
 mycursor = mydb.cursor()
 mycursor.execute("""

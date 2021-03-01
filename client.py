@@ -683,7 +683,16 @@ class App():
 
 			elif game.winner != None:
 				self.draw_winner(game.winner)
+
+				for i in range(game.lobby_size):
+					if player == i:
+						user.give_win(game.user_ids[i])
+					else:
+						user.give_defeat(game.user_ids[i])
+
+
 				pygame.time.delay(5000)
+
 
 				try:
 					game = n.send('reset')

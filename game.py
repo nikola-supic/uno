@@ -11,8 +11,6 @@ Created on Wed Feb 24 21:24:57 2021
 from random import shuffle
 from datetime import datetime
 
-import user
-
 class Game():
 	def __init__(self, id, lobby_size):
 		self.id = id
@@ -260,13 +258,6 @@ class Game():
 		if self.check_is_winner(player):
 			self.wins[player] += 1
 			self.winner = self.user_names[player]
-
-			for i in range(self.lobby_size):
-				if player == i:
-					user.give_win(self.user_ids[i])
-				else:
-					user.give_defeat(self.user_ids[i])
-
 
 	def valid_input(self, player, idx):
 		if idx < 0 or idx >= len(self.p_cards[player]):
