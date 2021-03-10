@@ -19,8 +19,9 @@ try:
 		database='uno'
 		)
 	mycursor = mydb.cursor()
+	print('[ + ] Successfully connected to database.')
 except mysql.connector.errors.InterfaceError: 
-	print('[-] Cant connect to DB.')
+	print('[ - ] Can not connect to DB.')
 
 def check_login(username, password):
 	sql = "SELECT * FROM users WHERE username=%s AND password=%s"

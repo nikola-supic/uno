@@ -25,6 +25,8 @@ class Server():
 		server = 'localhost'
 		port = 5555
 
+		print(f'[ > ] Binding {server}:{port}')
+
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
 			s.bind((server, port))

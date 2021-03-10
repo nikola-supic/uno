@@ -24,6 +24,7 @@ class Network():
 		return self.p
 
 	def connect(self, lobby_size):
+		print(f'[ > ] Trying to connect to: {self.server}:{self.port}')
 		try:
 			self.client.connect(self.addr)
 			self.client.send(str.encode(str(lobby_size)))
