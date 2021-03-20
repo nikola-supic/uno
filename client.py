@@ -12,6 +12,8 @@ import pygame
 import pickle
 import sys
 from datetime import datetime, timedelta
+from playsound import playsound
+from _thread import start_new_thread
 
 from game import Game
 from network import Network
@@ -52,6 +54,12 @@ class App():
 
 		self.user = None
 		self.show_info = False
+
+		start_new_thread(self.background_music, ())
+
+	def background_music(self):
+		while True:
+			playsound('music/chill_vibes.mp3')
 
 	def welcome(self):
 		pygame.display.set_caption('UNO (Welcome)')
