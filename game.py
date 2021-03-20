@@ -74,28 +74,28 @@ class Game():
 		deck = []
 		for color in ['RED', 'GREEN', 'BLUE', 'YELLOW']:
 			for i in range(1, 10):
-				img = f'images/{color.lower()}/{color.lower()}_{i}.jpg'
+				img = f'images/{color.lower()}/{color.lower()}_{i}.png'
 				deck.append(Card('NUMBER', color, i, img))
 				deck.append(Card('NUMBER', color, i, img))
 
-			img = f'images/{color.lower()}/{color.lower()}_0.jpg'
+			img = f'images/{color.lower()}/{color.lower()}_0.png'
 			deck.append(Card('NUMBER', color, 0, img))
 
-			img = f'images/{color.lower()}/{color.lower()}_draw_2.jpg'
+			img = f'images/{color.lower()}/{color.lower()}_draw_2.png'
 			deck.append(Card('DRAW2', color, -1, img))
 			deck.append(Card('DRAW2', color, -1, img))
 
-			img = f'images/{color.lower()}/{color.lower()}_reverse.jpg'
+			img = f'images/{color.lower()}/{color.lower()}_reverse.png'
 			deck.append(Card('REVERSE', color, -1, img))
 			deck.append(Card('REVERSE', color, -1, img))
 
-			img = f'images/{color.lower()}/{color.lower()}_skip.jpg'
+			img = f'images/{color.lower()}/{color.lower()}_skip.png'
 			deck.append(Card('SKIP', color, -1, img))
 			deck.append(Card('SKIP', color, -1, img))
 
 		for i in range(4):
-			deck.append(Card('WILDCOLOR', 'WILD', -1, 'images/wild_color.jpg'))
-			deck.append(Card('WILD4', 'WILD', -1, 'images/wild_4.jpg'))
+			deck.append(Card('WILDCOLOR', 'WILD', -1, 'images/wild_color.png'))
+			deck.append(Card('WILD4', 'WILD', -1, 'images/wild_4.png'))
 
 		shuffle(deck)
 		return deck
